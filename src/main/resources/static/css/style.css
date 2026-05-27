@@ -172,6 +172,18 @@ Estilos do Menu Mobile (Toggler)
   }
 }
 
+#navbar .nav-link:hover {
+        background: rgba(255,255,255,0.08) !important;
+        color:  rgba(59,130,246,0.8) !important;
+    }
+    #navbar .nav-link.active {
+        background: rgba(59,130,246,0.2) !important;
+        color:  rgba(59,130,246,0.8) !important;
+    }
+    #navbar .dropdown-item:hover {
+        background: rgba(59,130,246,0.8) !important;
+    }
+
 /*
 ==============================================
 Conteúdo principal para demonstração

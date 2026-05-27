@@ -200,6 +200,69 @@ CREATE TABLE `solicitacoes_material` (
 ) ENGINE=InnoDB;
 -- =================================================================
 
+-- =================================================================
+# 12. Armazena as contas bancárias cadastradas
+CREATE TABLE `contas_bancarias` (
+  `id_conta` INT NOT NULL AUTO_INCREMENT,
+  `nome_banco` VARCHAR(100) NOT NULL,
+  `agencia` VARCHAR(20) NULL,
+  `numero_conta` VARCHAR(30) NOT NULL,
+  `tipo_conta` ENUM('Conta Corrente', 'Poupança', 'Conta Pagamento', 'Outra') NOT NULL,
+  `saldo_inicial` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `status` ENUM('Ativa', 'Inativa') NOT NULL DEFAULT 'Ativa',
+  `descricao` TEXT NULL,
+  PRIMARY KEY (`id_conta`)
+) ENGINE=InnoDB;
+-- =================================================================
+
+-- =================================================================
+# 13. Organiza os tipos de entradas e despesas
+CREATE TABLE `categorias_financeiras` (
+  `id_categoria_financeira` INT NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(100) NOT NULL,
+  `tipo` ENUM('ENTRADA', 'SAIDA') NOT NULL,
+  `descricao` TEXT NULL,
+  PRIMARY KEY (`id_categoria_financeira`),
+  UNIQUE (`nome`, `tipo`)
+) ENGINE=InnoDB;
+-- =================================================================
 
 
+-- =================================================================
+# 14. Registra entradas e saídas financeiras
+CREATE TABLE `movimentacoes_financeiras` (
+  `id_movimentacao` INT NOT NULL AUTO_INCREMENT,
+  `id_conta` INT NOT NULL,
+  `id_categoria_financeira` INT NOT NULL,
+  `id_funcionario` INT NOT NULL,
+  `tipo_movimentacao` ENUM('ENTRADA', 'SAIDA') NOT NULL,
+  `valor` DECIMAL(10,2) NOT NULL,
+  `data_movimentacao` DATE NOT NULL,
+  `descricao` TEXT NULL,
+  `forma_pagamento` VARCHAR(80) NULL,
+  `comprovante` LONGTEXT NULL COMMENT 'Armazena o caminho do arquivo do comprovante',
+  PRIMARY KEY (`id_movimentacao`),
 
+  INDEX `fk_movimentacoes_contas_idx` (`id_conta`),
+  INDEX `fk_movimentacoes_categorias_idx` (`id_categoria_financeira`),
+  INDEX `fk_movimentacoes_funcionarios_idx` (`id_funcionario`),
+
+  CONSTRAINT `fk_movimentacoes_contas`
+    FOREIGN KEY (`id_conta`)
+    REFERENCES `contas_bancarias` (`id_conta`)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_movimentacoes_categorias`
+    FOREIGN KEY (`id_categoria_financeira`)
+    REFERENCES `categorias_financeiras` (`id_categoria_financeira`)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_movimentacoes_funcionarios`
+    FOREIGN KEY (`id_funcionario`)
+    REFERENCES `funcionarios` (`id_funcionario`)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
+-- =================================================================

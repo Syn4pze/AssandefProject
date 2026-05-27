@@ -94,8 +94,6 @@ public class FinanceiroController {
             @RequestParam(value = "tipoMovimentacao", required = false) String tipoMovimentacao,
             @RequestParam(value = "valor", required = false) BigDecimal valor,
             @RequestParam(value = "dataMovimentacao", required = false) String dataMovimentacao,
-            @RequestParam(value = "formaPagamento", required = false) String formaPagamento,
-            @RequestParam(value = "comprovante", required = false) String comprovante,
             @RequestParam(value = "descricao", required = false) String descricao,
             RedirectAttributes redirectAttributes) {
 
@@ -110,10 +108,7 @@ public class FinanceiroController {
             if (tipoMovimentacao != null && !tipoMovimentacao.isBlank())
                 mov.setTipoMovimentacao(MovimentacaoFinanceira.TipoMovimentacao.valueOf(tipoMovimentacao));
             if (valor != null) mov.setValor(valor);
-            if (dataMovimentacao != null && !dataMovimentacao.isBlank())
-                mov.setDataMovimentacao(java.time.LocalDate.parse(dataMovimentacao));
-            mov.setFormaPagamento(formaPagamento);
-            mov.setComprovante(comprovante);
+            mov.setDataMovimentacao(java.time.LocalDate.now());
             mov.setDescricao(descricao);
 
             movimentacaoFinanceiraService.save(mov);
@@ -219,7 +214,9 @@ public class FinanceiroController {
                 .map(m -> m.getValor() != null ? m.getValor() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal saldoGeral = totalEntradas.subtract(totalSaidas);
+        BigDecimal saldoGeral = contas.stream()
+                .map(c -> c.getSaldo() != null ? c.getSaldo() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("contas", contas);
         model.addAttribute("movimentacoes", movimentacoes);

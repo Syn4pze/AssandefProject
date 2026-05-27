@@ -35,8 +35,8 @@ public class ContaBancaria {
     @Column(name = "tipo_conta")
     private TipoConta tipoConta; // Ex: CORRENTE, POUPANCA, CAIXA
 
-    @Column(name = "saldo_inicial", precision = 10, scale = 2)
-    private BigDecimal saldoInicial;
+    @Column(name = "saldo", precision = 10, scale = 2)
+    private BigDecimal saldo;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

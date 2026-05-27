@@ -139,7 +139,7 @@
                                 <th>Agência</th>
                                 <th>Nº Conta</th>
                                 <th>Tipo</th>
-                                <th>Saldo Inicial</th>
+                                <th>Saldo</th>
                                 <th>Status</th>
                                 <th class="text-end">Ações</th>
                             </tr>
@@ -156,7 +156,7 @@
                     <span class="badge bg-secondary" th:case="'CAIXA'">Caixa</span>
                   </span>
                                 </td>
-                                <td th:text="${conta.saldoInicial != null ? 'R$ ' + #numbers.formatDecimal(conta.saldoInicial, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}"></td>
+                                <td th:text="${conta.saldo != null ? 'R$ ' + #numbers.formatDecimal(conta.saldo, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}"></td>
                                 <td>
                                     <span th:if="${conta.status != null and conta.status.name() == 'ATIVA'}" class="badge bg-success">Ativa</span>
                                     <span th:if="${conta.status != null and conta.status.name() == 'INATIVA'}" class="badge bg-danger">Inativa</span>
@@ -233,7 +233,6 @@
                                 <td th:text="${mov.conta != null ? mov.conta.nomeBanco : '-'}"></td>
                                 <td th:text="${mov.categoriaFinanceira != null ? mov.categoriaFinanceira.nome : '-'}"></td>
                                 <td th:text="${mov.descricao != null ? mov.descricao : '-'}"></td>
-                                <td th:text="${mov.formaPagamento != null ? mov.formaPagamento : '-'}"></td>
                                 <td>
                   <span th:classappend="${mov.tipoMovimentacao != null and mov.tipoMovimentacao.name() == 'ENTRADA'} ? 'text-success fw-bold' : 'text-danger fw-bold'"
                         th:text="${'R$ ' + #numbers.formatDecimal(mov.valor != null ? mov.valor : 0, 1, 'POINT', 2, 'COMMA')}"></span>
@@ -310,9 +309,6 @@
         </div>
     </div>
 </main>
-
-<footer th:replace="~{fragments/base :: rodape}"></footer>
-
 <!-- ===================== MODAL: CONTA ===================== -->
 <div class="modal fade" id="modalConta" tabindex="-1" aria-labelledby="modalContaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -348,10 +344,10 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Saldo Inicial (R$)</label>
+                            <label class="form-label">Saldo (R$)</label>
                             <div class="input-group">
                                 <span class="input-group-text">R$</span>
-                                <input type="number" class="form-control" id="contaSaldoInicial" name="saldoInicial" min="0" step="0.01" placeholder="0,00"/>
+                                <input type="number" class="form-control" id="contaSaldo" name="saldo" min="0" step="0.01" placeholder="0,00"/>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -408,7 +404,7 @@
                                         th:text="${cat.nome}"></option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <label class="form-label">Tipo</label>
                             <select class="form-select" id="movTipo" name="tipoMovimentacao" required>
                                 <option value="">Selecione...</option>
@@ -422,26 +418,6 @@
                                 <span class="input-group-text">R$</span>
                                 <input type="number" class="form-control" id="movValor" name="valor" min="0" step="0.01" placeholder="0,00" required/>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Data</label>
-                            <input type="date" class="form-control" id="movData" name="dataMovimentacao" required/>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Forma de Pagamento</label>
-                            <select class="form-select" id="movFormaPagamento" name="formaPagamento">
-                                <option value="">Selecione...</option>
-                                <option value="Dinheiro">Dinheiro</option>
-                                <option value="PIX">PIX</option>
-                                <option value="Transferência">Transferência</option>
-                                <option value="Boleto">Boleto</option>
-                                <option value="Cartão de Débito">Cartão de Débito</option>
-                                <option value="Cartão de Crédito">Cartão de Crédito</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Comprovante (URL ou referência)</label>
-                            <input type="text" class="form-control" id="movComprovante" name="comprovante" placeholder="Link ou número do comprovante"/>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Descrição</label>
@@ -538,7 +514,7 @@
       document.getElementById('contaAgencia').value = '';
       document.getElementById('contaNumeroConta').value = '';
       document.getElementById('contaTipoConta').value = '';
-      document.getElementById('contaSaldoInicial').value = '';
+      document.getElementById('contaSaldo').value = '';
       document.getElementById('contaStatus').value = '';
       document.getElementById('contaDescricao').value = '';
       document.getElementById('modalContaLabel').innerHTML = '<i class="bi bi-credit-card-fill me-2"></i>Nova Conta Bancária';
@@ -553,7 +529,7 @@
           document.getElementById('contaAgencia').value = c.agencia || '';
           document.getElementById('contaNumeroConta').value = c.numeroConta || '';
           document.getElementById('contaTipoConta').value = c.tipoConta || '';
-          document.getElementById('contaSaldoInicial').value = c.saldoInicial || '';
+          document.getElementById('contaSaldo').value = c.saldo || '';
           document.getElementById('contaStatus').value = c.status || '';
           document.getElementById('contaDescricao').value = c.descricao || '';
           document.getElementById('modalContaLabel').innerHTML = '<i class="bi bi-credit-card-fill me-2"></i>Editar Conta Bancária';
@@ -572,9 +548,6 @@
       document.getElementById('movIdCategoria').value = '';
       document.getElementById('movTipo').value = '';
       document.getElementById('movValor').value = '';
-      document.getElementById('movData').value = '';
-      document.getElementById('movFormaPagamento').value = '';
-      document.getElementById('movComprovante').value = '';
       document.getElementById('movDescricao').value = '';
       document.getElementById('modalMovimentacaoLabel').innerHTML = '<i class="bi bi-arrow-left-right me-2"></i>Nova Movimentação';
     }
@@ -588,9 +561,6 @@
           document.getElementById('movIdCategoria').value = (mov.categoriaFinanceira && mov.categoriaFinanceira.idCategoriaFinanceira) ? mov.categoriaFinanceira.idCategoriaFinanceira : '';
           document.getElementById('movTipo').value = mov.tipoMovimentacao || '';
           document.getElementById('movValor').value = mov.valor || '';
-          document.getElementById('movData').value = mov.dataMovimentacao || '';
-          document.getElementById('movFormaPagamento').value = mov.formaPagamento || '';
-          document.getElementById('movComprovante').value = mov.comprovante || '';
           document.getElementById('movDescricao').value = mov.descricao || '';
           document.getElementById('modalMovimentacaoLabel').innerHTML = '<i class="bi bi-arrow-left-right me-2"></i>Editar Movimentação';
 

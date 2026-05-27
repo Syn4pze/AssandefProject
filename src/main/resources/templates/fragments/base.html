@@ -20,110 +20,163 @@
 
 <body>
 <header th:fragment="cabecalho">
-    <nav id="navbar" class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/}">
-                <img th:src="@{/img/assandef-logo.png}" alt="Logo da ASSANDEF" class="d-inline-block align-text-top" />
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-dark"
+         style="background-color: white; padding: 0 1.5rem; min-height: 60px;">
+        <div class="container-fluid px-0">
+
+            <!-- BRAND com imagem real -->
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+                <img th:src="@{/img/assandef-logo.png}" alt="Logo da ASSANDEF"
+                     style="height:38px;width:auto;" />
+                <span class="fw-semibold fs-6 text-white d-none d-sm-inline">ASSANDEF</span>
             </a>
-            <div class="navbar-title d-none d-lg-block">
-                <a class="fw-bold fs-4 text-decoration-none" th:href="@{/}">ASSANDEF</a>
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-                    aria-label="Alternar navegação">
-                <span class="navbar-toggler-icon">
-                    <span class="bar bar1"></span>
-                    <span class="bar bar2"></span>
-                    <span class="bar bar3"></span>
-                </span>
+
+            <!-- TOGGLER MOBILE -->
+            <button class="navbar-toggler border-0" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false"
+                    aria-label="Alternar navegação"
+                    style="box-shadow:none;">
+                <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <!-- Menu para usuários NÃO autenticados -->
-                <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
+
+                <!-- ===== VISITANTE ===== -->
+                <ul class="navbar-nav align-items-center gap-1 me-2" sec:authorize="!isAuthenticated()">
                     <li class="nav-item">
-                        <a class="nav-link" th:classappend="${ativa == 'doar'} ? ' active' : ''"
-                           th:href="@{/doadores/newdonation}">SOS</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'doar'} ? ' active' : ''"
+                           th:href="@{/doadores/newdonation}">
+                            <i class="bi bi-heart-pulse-fill text-danger"></i> SOS
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'sobre'} ? ' active' : ''"
+                           th:href="@{/sobre}">
+                            <i class="bi bi-info-circle"></i> Sobre a Assandef
+                        </a>
                     </li>
                 </ul>
-                <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
+
+                <!-- ===== AUTENTICADO ===== -->
+                <ul class="navbar-nav align-items-center gap-1 me-2" sec:authorize="isAuthenticated()">
+
                     <li class="nav-item">
-                        <a class="nav-link" th:classappend="${ativa == 'sobre'} ? ' active' : ''"
-                           th:href="@{/sobre}">Sobre a Assandef</a>
-                    </li>
-                </ul>
-                <!-- Menu completo para usuários autenticados -->
-                <ul class="navbar-nav" sec:authorize="isAuthenticated()">
-                    <!-- Início: disponível para todos os autenticados (1,2,3) -->
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${ativa == 'inicio'} ? ' active' : ''"
-                           th:href="@{/}">Início</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'inicio'} ? ' active' : ''"
+                           th:href="@{/}">
+                            <i class="bi bi-house-door"></i>
+                            <span class="d-none d-xl-inline">Início</span>
+                        </a>
                     </li>
 
-                    <!-- Almoxarifado: disponível para Administrador (1) e Auxiliar Administrativo (3) -->
                     <li class="nav-item" th:if="${hierarquia == 1 or hierarquia == 2 or hierarquia == 3}">
-                        <a class="nav-link" th:classappend="${ativa == 'almoxarifado'} ? ' active' : ''"
-                           th:href="@{/almoxarifado}">Almoxarifado</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'almoxarifado'} ? ' active' : ''"
+                           th:href="@{/almoxarifado}">
+                            <i class="bi bi-box-seam"></i>
+                            <span class="d-none d-xl-inline">Almoxarifado</span>
+                        </a>
                     </li>
 
-                    <!-- Atendimento: disponível para Administrador (1) e Atendente (2) -->
                     <li class="nav-item" th:if="${hierarquia == 1 or hierarquia == 2}">
-                        <a class="nav-link" th:classappend="${ativa == 'atendimento'} ? ' active' : ''"
-                           th:href="@{/atendimento}">Atendimento</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'atendimento'} ? ' active' : ''"
+                           th:href="@{/atendimento}">
+                            <i class="bi bi-clipboard2-pulse"></i>
+                            <span class="d-none d-xl-inline">Atendimento</span>
+                        </a>
                     </li>
 
-                    <!-- Pacientes: disponível para Administrador (1) e Atendente (2) -->
                     <li class="nav-item" th:if="${hierarquia == 1 or hierarquia == 2}">
-                        <a class="nav-link" th:classappend="${ativa == 'pacientes'} ? ' active' : ''"
-                           th:href="@{/pacientes}">Pacientes</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'pacientes'} ? ' active' : ''"
+                           th:href="@{/pacientes}">
+                            <i class="bi bi-people"></i>
+                            <span class="d-none d-xl-inline">Pacientes</span>
+                        </a>
                     </li>
 
                     <li class="nav-item" th:if="${hierarquia == 1}">
-                        <a class="nav-link" th:classappend="${ativa == 'financeiro'} ? ' active' : ''"
-                           th:href="@{/financeiro}">Financeiro</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'financeiro'} ? ' active' : ''"
+                           th:href="@{/financeiro}">
+                            <i class="bi bi-cash-stack"></i>
+                            <span class="d-none d-xl-inline">Financeiro</span>
+                        </a>
                     </li>
 
-
-                    <!-- Afiliações / Doadores: disponível para Administrador (1) e Auxiliar Administrativo (3) -->
                     <li class="nav-item" th:if="${hierarquia == 1 or hierarquia == 3}">
-                        <a class="nav-link" th:classappend="${ativa == 'doar'} ? ' active' : ''"
-                           th:href="@{/doadores}">Afiliações</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'doar'} ? ' active' : ''"
+                           th:href="@{/doadores}">
+                            <i class="bi bi-handshake"></i>
+                            <span class="d-none d-xl-inline">Afiliações</span>
+                        </a>
                     </li>
 
-                    <!-- Gestão de Acesso (funcionários): apenas Administrador/Diretoria (1) -->
                     <li class="nav-item" th:if="${hierarquia == 1}">
-                        <a class="nav-link" th:classappend="${ativa == 'gestao'} ? ' active' : ''"
-                           th:href="@{/funcionarios}">Gestão de Acesso</a>
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:classappend="${ativa == 'gestao'} ? ' active' : ''"
+                           th:href="@{/funcionarios}">
+                            <i class="bi bi-shield-lock"></i>
+                            <span class="d-none d-xl-inline">Gestão de Acesso</span>
+                        </a>
                     </li>
+
                 </ul>
 
-                <hr class="d-lg-none text-muted" />
+                <hr class="d-lg-none border-secondary my-2" />
 
-                <!-- Botão de Login/Logout -->
+                <!-- ===== LOGIN / DROPDOWN ===== -->
                 <div class="navbar-nav">
-                    <!-- Botão de Login (não autenticado) -->
+
+                    <!-- Não autenticado -->
                     <div class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link align-items-center" th:href="@{/login}">
-                            <i class="bi bi-person-circle fs-4 me-2"></i>Acesso
+                        <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           th:href="@{/login}"
+                           style="border:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-person-circle fs-5"></i>
+                            <span>Acesso</span>
                         </a>
                     </div>
 
-                    <!-- Dropdown do usuário (autenticado) -->
+                    <!-- Autenticado: dropdown -->
                     <div class="nav-item dropdown" sec:authorize="isAuthenticated()">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle fs-4 me-2"></i>
-                            <span sec:authentication="name">Usuário</span>
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 px-3 py-2 rounded"
+                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                           style="background:rgba(255,255,255,0.06);border:1px solid rgba(59,130,246,0.8);">
+                            <i class="bi bi-person-circle fs-5"></i>
+                            <span class="d-none d-sm-inline" sec:authentication="name">Usuário</span>
+                            <span class="badge rounded-pill d-none d-md-inline ms-1"
+                                  style="rgba(59,130,246,0.8);color:#60a5fa;font-size:10px;"
+                                  th:text="${hierarquia == 1} ? 'Admin' : (${hierarquia == 2} ? 'Atendente' : 'Auxiliar')">
+                            Perfil
+                        </span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 mt-1"
+                            style="border-radius:10px;min-width:180px;">
                             <li>
-                                <form th:action="@{/logout}" method="post" class="d-inline">
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Sair
+                            <span class="dropdown-item-text py-2"
+                                  style="color:#64748b;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <span sec:authentication="name">Usuário</span>
+                            </span>
+                            </li>
+                            <li>
+                                <form th:action="@{/logout}" method="post">
+                                    <button type="submit"
+                                            class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                            style="color:#f87171;font-size:14px;">
+                                        <i class="bi bi-box-arrow-right"></i> Sair
                                     </button>
                                 </form>
                             </li>
                         </ul>
                     </div>
+
                 </div>
             </div>
         </div>

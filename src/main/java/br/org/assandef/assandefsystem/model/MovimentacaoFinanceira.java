@@ -41,10 +41,4 @@ public class MovimentacaoFinanceira {
 
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
-
-    @Column(name = "forma_pagamento", length = 80)
-    private String formaPagamento;
-
-    @Column(name = "comprovante", columnDefinition = "LONGTEXT")
-    private String comprovante;
 }

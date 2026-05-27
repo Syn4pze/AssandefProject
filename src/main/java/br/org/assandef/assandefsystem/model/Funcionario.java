@@ -37,6 +37,6 @@ public class Funcionario {
 
     @NotNull(message = "Email é obrigatório")
     @Column(name = "email", nullable = false)
-    private Integer email;
+    private String email;
 
 }
