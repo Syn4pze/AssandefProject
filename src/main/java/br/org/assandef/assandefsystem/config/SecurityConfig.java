@@ -1,35 +1,58 @@
 package br.org.assandef.assandefsystem.config;
 
 import br.org.assandef.assandefsystem.security.AuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final ApplicationContext applicationContext;
+    @Value("${security.rememberme.key}")
+    private String rememberMeKey;
 
     public SecurityConfig(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
     @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**")
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation(sessionFixation -> sessionFixation.migrateSession())
+                        .maximumSessions(2)
+                )
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .contentTypeOptions(contentType -> {
+                        })
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()
-                        .requestMatchers("/", "/login", "/doadores/newdonation", "/sobre").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/doadores/salvar").permitAll()
+                        .requestMatchers("/", "/login", "/esqueci-senha", "/reset-password", "/doadores/newdonation", "/sobre","/publicacoes","/publicacoes/**","/images/**","/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/doadores/salvar", "/password/forgot", "/password/reset").permitAll()
 
                         // /funcionarios/** -> somente hierarquia 1
                         .requestMatchers("/funcionarios/**")
@@ -136,7 +159,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .rememberMe(remember -> remember
-                        .key("uniqueAndSecret")
+                        .key(rememberMeKey)
                         .tokenValiditySeconds(86400)
                 )
                 .exceptionHandling(ex -> ex
@@ -144,6 +167,11 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean

@@ -8,72 +8,173 @@
 
 <header th:replace="~{fragments/base :: cabecalho}"></header>
 
-<main>
-  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-    </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <img th:src="@{/img/carrossel-1.jpeg}" class="d-block w-100" alt="Pessoas com deficiência em atividade" />
-        <div class="carousel-caption d-flex flex-column h-100 align-items-center justify-content-center text-center">
-          <h2 class="display-4 fw-bold">Promovendo Inclusão e Qualidade de Vida</h2>
-          <p class="lead">Juntos, construímos um futuro mais acessível e digno para todos.</p>
-          <a href="#" class="btn btn-lg btn-primary mt-3">Saiba Mais</a>
-        </div>
+<main class="home-page">
+  <section class="home-hero">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
       </div>
-      <div class="carousel-item">
-        <img th:src="@{/img/carrossel-2.jpeg}" class="d-block w-100" alt="Equipe da ASSANDEF em ação" />
-        <div class="carousel-caption d-flex flex-column h-100 align-items-center justify-content-center text-center">
-          <h2 class="display-4 fw-bold">Nossa Equipe, Sua Força</h2>
-          <p class="lead">Profissionais dedicados que fazem a diferença no dia a dia.</p>
-          <a href="#" class="btn btn-lg btn-primary mt-3">Conheça-nos</a>
-        </div>
-      </div>
-      <!--<div class="carousel-item">
-        <img th:src="@{/assets/img/carrossel-2.jpeg}" class="d-block w-100" alt="Voluntários ajudando" />
-        <div class="carousel-caption d-flex flex-column h-100 align-items-center justify-content-center text-center">
-          <h2 class="display-4 fw-bold">Faça Parte Dessa História</h2>
-          <p class="lead">Seja um voluntário ou um doador. Sua ajuda transforma vidas!</p>
-          <a href="#" class="btn btn-lg btn-primary mt-3">Como Ajudar</a>
-        </div>
-      </div> -->
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Próximo</span>
-    </button>
-  </div>
 
-  <section class="container my-5 py-5 text-center">
-    <h2>Nossos Projetos e Impacto Social</h2>
-    <p class="lead">Conheça algumas das iniciativas que a ASSANDEF realiza para a comunidade.</p>
-    <div class="row mt-4">
-      <div class="col-md-4">
-        <div class="card p-3 shadow-sm h-100">
-          <i class="bi bi-person-wheelchair fs-1 text-primary mb-3"></i>
-          <h3 class="h5">Apoio a Pacientes</h3>
-          <p>Oferecemos suporte contínuo e personalizado, garantindo que cada indivíduo receba o cuidado necessário.</p>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img th:src="@{/img/carrossel-1.jpeg}" class="d-block w-100 home-hero-image" alt="Pessoas com deficiência em atividade">
+          <div class="home-hero-layer"></div>
+          <div class="container home-hero-caption-wrap">
+            <div class="home-hero-caption">
+              <span class="section-kicker">Inclusão com propósito</span>
+              <h1>Transformando vidas com acolhimento, acesso e autonomia</h1>
+              <p>Na ASSANDEF, cada ação fortalece direitos e amplia oportunidades para pessoas com deficiência.</p>
+              <div class="home-hero-actions">
+                <a th:href="@{/sobre}" class="btn btn-light btn-lg">
+                  <i class="bi bi-info-circle me-2"></i>Conheça a ASSANDEF
+                </a>
+                <a th:href="@{/doadores/newdonation}" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-heart-pulse me-2"></i>Apoiar agora
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <img th:src="@{/img/carrossel-2.jpeg}" class="d-block w-100 home-hero-image" alt="Equipe da ASSANDEF em ação">
+          <div class="home-hero-layer"></div>
+          <div class="container home-hero-caption-wrap">
+            <div class="home-hero-caption">
+              <span class="section-kicker">Compromisso diário</span>
+              <h2>Equipe dedicada e projetos que geram impacto real</h2>
+              <p>Atendimentos, atividades e parcerias que promovem saúde, convivência e protagonismo social.</p>
+              <div class="home-hero-actions">
+                <a th:href="@{/publicacoes}" class="btn btn-light btn-lg">
+                  <i class="bi bi-newspaper me-2"></i>Ver publicações
+                </a>
+                <a th:href="@{/sobre#atividades}" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-grid-3x3-gap me-2"></i>Explorar atividades
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card p-3 shadow-sm h-100">
-          <i class="bi bi-lightbulb fs-1 text-primary mb-3"></i>
-          <h3 class="h5">Programas Educacionais</h3>
-          <p>Desenvolvemos workshops e cursos para capacitação e desenvolvimento pessoal dos assistidos.</p>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Próximo</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="home-pillars">
+    <div class="container">
+      <div class="home-heading text-center">
+        <span class="section-kicker">Nossos pilares</span>
+        <h2>Atuação social com foco em dignidade e inclusão</h2>
+        <p>Conheça frentes essenciais que orientam o trabalho da ASSANDEF no dia a dia.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <article class="home-pillar-card h-100">
+            <div class="home-pillar-icon">
+              <i class="bi bi-heart-pulse"></i>
+            </div>
+            <h3>Apoio integral</h3>
+            <p>Atendimento humanizado com acompanhamento social e ações voltadas à qualidade de vida.</p>
+          </article>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <article class="home-pillar-card h-100">
+            <div class="home-pillar-icon">
+              <i class="bi bi-people"></i>
+            </div>
+            <h3>Inclusão ativa</h3>
+            <p>Projetos culturais, esportivos e educativos que fortalecem autonomia e participação comunitária.</p>
+          </article>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <article class="home-pillar-card h-100">
+            <div class="home-pillar-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <h3>Defesa de direitos</h3>
+            <p>Atuação institucional para ampliar acessibilidade, cidadania e representatividade das pessoas com deficiência.</p>
+          </article>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card p-3 shadow-sm h-100">
-          <i class="bi bi-people-fill fs-1 text-primary mb-3"></i>
-          <h3 class="h5">Inclusão Social</h3>
-          <p>Organizamos eventos e parcerias para promover a integração e visibilidade na sociedade.</p>
+    </div>
+  </section>
+
+  <section class="home-news">
+    <div class="container">
+      <div class="home-news-header">
+        <div>
+          <span class="section-kicker">Conteúdo recente</span>
+          <h2>Últimas Publicações</h2>
+          <p>Fique por dentro das notícias, eventos e ações da ASSANDEF.</p>
+        </div>
+        <a th:href="@{/publicacoes}" class="btn btn-outline-primary">Ler mais publicações</a>
+      </div>
+
+      <div class="row g-4" th:if="${ultimasPublicacoes != null and !ultimasPublicacoes.empty}">
+        <div class="col-md-6 col-lg-4" th:each="publicacao : ${ultimasPublicacoes}">
+          <article class="home-news-card">
+            <div class="home-news-image-wrap">
+              <img th:if="${publicacao.imagens != null and !publicacao.imagens.empty}"
+                   th:src="@{'/' + ${publicacao.imagens[0].caminhoArquivo}}"
+                   class="home-news-image" alt="Imagem da publicação">
+              <img th:if="${publicacao.imagens == null or publicacao.imagens.empty}"
+                   src="https://placehold.co/600x300/0d6efd/white?text=Publicação"
+                   class="home-news-image" alt="Imagem padrão da publicação">
+            </div>
+
+            <div class="home-news-body">
+              <span class="badge home-news-badge mb-2"
+                    th:classappend="${publicacao.tipoConteudo.name() == 'NOTICIA'} ? 'bg-primary' : (${publicacao.tipoConteudo.name() == 'EVENTO'} ? 'bg-success' : '')"
+                    th:style="${publicacao.tipoConteudo.name() == 'ARTIGO'} ? 'width:fit-content;background-color:#6f42c1' : 'width:fit-content'"
+                    th:text="${publicacao.tipoConteudo.name() == 'NOTICIA'} ? 'Notícia' : (${publicacao.tipoConteudo.name() == 'EVENTO'} ? 'Evento' : 'Artigo')">
+              </span>
+
+              <h3 class="home-news-title" th:text="${publicacao.titulo}">Título da publicação</h3>
+              <p class="home-news-text" th:text="${publicacao.descricao}"></p>
+
+              <div class="home-news-meta">
+                <small class="text-muted">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  <span th:text="${publicacao.dataCriacao != null ? #temporals.format(publicacao.dataCriacao, 'dd/MM/yyyy') : ''}"></span>
+                </small>
+                <a th:href="@{/publicacoes}" class="btn btn-sm btn-outline-primary">Ler mais</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="home-news-empty text-center text-muted" th:if="${ultimasPublicacoes == null or ultimasPublicacoes.empty}">
+        Nenhuma publicação recente disponível no momento.
+      </div>
+    </div>
+  </section>
+
+  <section class="home-cta">
+    <div class="container">
+      <div class="home-cta-card text-center">
+        <span class="section-kicker">Faça parte</span>
+        <h2>Ajude a construir uma sociedade mais inclusiva e acessível</h2>
+        <p>Seu apoio fortalece projetos que transformam realidades e ampliam oportunidades para quem mais precisa.</p>
+        <div class="home-cta-actions">
+          <a th:href="@{/doadores/newdonation}" class="btn btn-light btn-lg">
+            <i class="bi bi-heart-fill me-2"></i>Quero apoiar
+          </a>
+          <a th:href="@{/sobre}" class="btn btn-outline-light btn-lg">
+            <i class="bi bi-info-circle me-2"></i>Saiba mais
+          </a>
         </div>
       </div>
     </div>
@@ -81,8 +182,6 @@
 </main>
 
 <footer th:replace="~{fragments/base :: rodape}"></footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/js/script.js}"></script>
+<th:block th:replace="~{fragments/base :: scriptsPadrao}"></th:block>
 </body>
 </html>

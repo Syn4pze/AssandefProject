@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/base :: headPadrao('Nova Publicação')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/base :: cabecalho}"></header>
+
+<main class="py-5" style="background:#f8fafc; min-height:100vh;">
+  <div class="container" style="max-width:860px;">
+
+    <!-- Cabeçalho da página -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <a th:href="@{/gestao/publicacoes}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <div>
+        <h4 class="mb-0 fw-bold">Nova Publicação</h4>
+        <small class="text-muted">Preencha os campos abaixo para criar uma publicação</small>
+      </div>
+    </div>
+
+    <!-- Alertas -->
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i>
+      <span th:text="${sucesso}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      <span th:text="${erro}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Formulário -->
+    <form th:action="@{/gestao/publicacoes/salvar}" method="post" enctype="multipart/form-data">
+
+      <!-- Bloco 1: Informações Principais -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="mb-0 fw-semibold"><i class="bi bi-file-text me-2 text-primary"></i>Informações Principais</h6>
+        </div>
+        <div class="card-body p-4">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+            <input type="text" name="titulo" class="form-control"
+                   placeholder="Ex: ASSANDEF realiza evento de inclusão..."
+                   maxlength="180" required />
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Tipo <span class="text-danger">*</span></label>
+              <select name="tipoConteudo" class="form-select" id="tipoConteudo" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option th:each="tipo : ${tipos}"
+                        th:value="${tipo}"
+                        th:text="${tipo}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Status</label>
+              <select name="status" class="form-select">
+                <option value="RASCUNHO" selected>Rascunho</option>
+                <option value="PUBLICADA">Publicar imediatamente</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Descrição / Resumo <span class="text-danger">*</span></label>
+            <textarea name="descricao" class="form-control" rows="3"
+                      placeholder="Breve resumo exibido nos cards de publicação..."
+                      required></textarea>
+          </div>
+
+          <div class="mb-1">
+            <label class="form-label fw-semibold">Conteúdo Completo</label>
+            <textarea name="conteudo" class="form-control" rows="8"
+                      placeholder="Texto completo da publicação (opcional)..."></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Bloco 2: Campos de Evento (exibido somente quando tipo = EVENTO) -->
+      <div class="card border-0 shadow-sm mb-4" id="camposEvento" style="display:none!important;">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="mb-0 fw-semibold"><i class="bi bi-calendar-event me-2 text-success"></i>Detalhes do Evento</h6>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Data e Hora do Evento</label>
+              <input type="datetime-local" name="dataEvento" class="form-control" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Local do Evento</label>
+              <input type="text" name="localEvento" class="form-control"
+                     placeholder="Ex: Sede da ASSANDEF" maxlength="255" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 3: Imagens -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="mb-0 fw-semibold"><i class="bi bi-images me-2 text-warning"></i>Imagens <small class="text-muted fw-normal">(máx. 3 — JPEG, PNG ou WebP — até 2 MB cada)</small></h6>
+        </div>
+        <div class="card-body p-4">
+
+          <input type="file" name="arquivos" id="inputImagens"
+                 class="form-control mb-3"
+                 accept="image/jpeg,image/png,image/webp"
+                 multiple />
+
+          <!-- Preview das imagens selecionadas -->
+          <div id="previewImagens" class="d-flex flex-wrap gap-3"></div>
+
+        </div>
+      </div>
+
+      <!-- Bloco 4: Vídeos do YouTube -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-semibold"><i class="bi bi-youtube me-2 text-danger"></i>Vídeos do YouTube <small class="text-muted fw-normal">(máx. 3)</small></h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" id="btnAddVideo">
+            <i class="bi bi-plus-lg me-1"></i>Adicionar
+          </button>
+        </div>
+        <div class="card-body p-4">
+          <div id="camposVideo">
+            <!-- Campo inicial -->
+            <div class="input-group mb-2 campo-video">
+              <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+              <input type="url" name="linksYoutube" class="form-control"
+                     placeholder="https://www.youtube.com/watch?v=..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div class="d-flex justify-content-end gap-2 mb-5">
+        <a th:href="@{/gestao/publicacoes}" class="btn btn-outline-secondary px-4">
+          <i class="bi bi-x-lg me-1"></i>Cancelar
+        </a>
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="bi bi-floppy me-1"></i>Salvar Publicação
+        </button>
+      </div>
+
+    </form>
+  </div>
+</main>
+
+<footer th:replace="~{fragments/base :: rodape}"></footer>
+<div th:replace="~{fragments/base :: scriptsPadrao}"></div>
+
+<script>
+  // ── Mostrar/ocultar campos de Evento ──────────────────────
+  document.getElementById('tipoConteudo').addEventListener('change', function () {
+    const bloco = document.getElementById('camposEvento');
+    bloco.style.display = this.value === 'EVENTO' ? 'block' : 'none';
+  });
+
+  // ── Preview de imagens ────────────────────────────────────
+  document.getElementById('inputImagens').addEventListener('change', function () {
+    const preview = document.getElementById('previewImagens');
+    preview.innerHTML = '';
+
+    const files = Array.from(this.files).slice(0, 3); // máx. 3
+    files.forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.innerHTML += `
+          <div class="position-relative" style="width:120px;">
+            <img src="${e.target.result}"
+                 class="rounded border"
+                 style="width:120px;height:90px;object-fit:cover;" />
+            <span class="position-absolute top-0 start-0 badge bg-primary m-1"
+                  style="font-size:10px;">${i === 0 ? 'Principal' : 'Imagem ' + (i + 1)}</span>
+          </div>`;
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // ── Adicionar campos de vídeo (máx. 3) ───────────────────
+  document.getElementById('btnAddVideo').addEventListener('click', function () {
+    const container = document.getElementById('camposVideo');
+    const total = container.querySelectorAll('.campo-video').length;
+    if (total >= 3) {
+      this.disabled = true;
+      return;
+    }
+    container.insertAdjacentHTML('beforeend', `
+      <div class="input-group mb-2 campo-video">
+        <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+        <input type="url" name="linksYoutube" class="form-control"
+               placeholder="https://www.youtube.com/watch?v=..." />
+        <button type="button" class="btn btn-outline-danger remover-video">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>`);
+    if (container.querySelectorAll('.campo-video').length >= 3) this.disabled = true;
+  });
+
+  document.getElementById('camposVideo').addEventListener('click', function (e) {
+    if (e.target.closest('.remover-video')) {
+      e.target.closest('.campo-video').remove();
+      document.getElementById('btnAddVideo').disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>

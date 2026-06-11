@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/base :: headPadrao('Publicações')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/base :: cabecalho}"></header>
+
+<main class="bg-light min-vh-100 pt-0">
+
+    <!-- Hero da página -->
+    <div class="bg-primary text-white py-4">
+        <div class="container">
+            <h1 class="fw-bold mb-1">Publicações</h1>
+            <p class="mb-0 opacity-75">Notícias, eventos e artigos da ASSANDEF</p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row g-4">
+
+            <!-- COLUNA PRINCIPAL -->
+            <div class="col-lg-8">
+
+                <div class="d-flex gap-2 flex-wrap mb-4" id="filtrosTipoTopo">
+                    <button type="button" class="btn btn-primary btn-sm active" data-tipo-filtro="TODOS">Todos</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-tipo-filtro="NOTICIA">Notícias</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-tipo-filtro="EVENTO">Eventos</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-tipo-filtro="ARTIGO">Artigos</button>
+                </div>
+
+                <div class="d-flex flex-column gap-3" id="listaPublicacoes">
+                    <div th:each="pub : ${publicacoes}" class="card border-0 shadow-sm publicacao-card"
+                         th:attr="data-tipo=${pub.tipoConteudo.name()}">
+
+                        <!-- Com imagem principal -->
+                        <div th:if="${pub.imagens != null and !pub.imagens.empty}" class="row g-0">
+                            <div class="col-4 col-md-3">
+                                <img th:src="@{'/' + ${pub.imagens[0].caminhoArquivo}}"
+                                     class="img-fluid rounded-start h-100"
+                                     style="object-fit:cover;min-height:130px;"
+                                     th:alt="${pub.titulo}">
+                            </div>
+                            <div class="col-8 col-md-9">
+                                <div class="card-body py-3 px-3 d-flex flex-column h-100">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span th:classappend="${pub.tipoConteudo.name() == 'NOTICIA'} ? 'bg-primary' : (${pub.tipoConteudo.name() == 'EVENTO'} ? 'bg-success' : '')"
+                                              class="badge"
+                                              th:style="${pub.tipoConteudo.name() == 'ARTIGO'} ? 'background-color:#6f42c1;font-size:.7rem' : 'font-size:.7rem'"
+                                              th:text="${pub.tipoConteudo.name() == 'NOTICIA'} ? 'Notícia' : (${pub.tipoConteudo.name() == 'EVENTO'} ? 'Evento' : 'Artigo')">
+                                        </span>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            <span th:text="${#temporals.format(pub.dataCriacao, 'HH') + 'h' + #temporals.format(pub.dataCriacao, 'mm')}"></span>
+                                            <i class="bi bi-clock ms-2 me-1"></i>
+                                            <span th:text="${#temporals.format(pub.dataCriacao, 'HH') + 'h' + #temporals.format(pub.dataCriacao, 'mm')}"></span>
+                                        </small>
+                                    </div>
+                                    <h5 class="card-title mb-1 fw-semibold lh-sm">
+                                        <span class="text-dark" th:text="${pub.titulo}"></span>
+                                    </h5>
+                                    <p class="card-text text-muted small mb-0 flex-grow-1 descricao-publicacao"
+                                       style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;"
+                                       th:text="${pub.descricao}"></p>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-primary btn-sm"
+                                                th:attr="data-id=${pub.idPublicacao}"
+                                                onclick="abrirModalPublicacao(this)">
+                                            Ver mais →
+                                        </button>
+
+                                        <div th:if="${hierarquia == 1}" class="dropdown">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary border-0"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                <li>
+                                                    <button type="button" class="dropdown-item"
+                                                            th:attr="onclick=|abrirModalEdicaoPublicacao(${pub.idPublicacao})|">
+                                                        <i class="bi bi-pencil me-2 text-primary"></i>Editar
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <form th:action="@{/gestao/publicacoes/excluir/{id}(id=${pub.idPublicacao})}" method="post"
+                                                          onsubmit="return confirm('Remover esta publicação?')">
+                                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="bi bi-trash me-2"></i>Remover
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sem imagem -->
+                        <div th:if="${pub.imagens == null or pub.imagens.empty}" class="card-body py-3 px-3">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span th:classappend="${pub.tipoConteudo.name() == 'NOTICIA'} ? 'bg-primary' : (${pub.tipoConteudo.name() == 'EVENTO'} ? 'bg-success' : '')"
+                                      class="badge"
+                                      th:style="${pub.tipoConteudo.name() == 'ARTIGO'} ? 'background-color:#6f42c1;font-size:.7rem' : 'font-size:.7rem'"
+                                      th:text="${pub.tipoConteudo.name() == 'NOTICIA'} ? 'Notícia' : (${pub.tipoConteudo.name() == 'EVENTO'} ? 'Evento' : 'Artigo')">
+                                </span>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <span th:text="${#temporals.format(pub.dataCriacao, 'HH') + 'h' + #temporals.format(pub.dataCriacao, 'mm')}"></span>
+                                    <i class="bi bi-clock ms-2 me-1"></i>
+                                    <span th:text="${#temporals.format(pub.dataCriacao, 'HH') + 'h' + #temporals.format(pub.dataCriacao, 'mm')}"></span>
+                                </small>
+                            </div>
+                            <h5 class="card-title mb-1 fw-semibold lh-sm">
+                                <span class="text-dark" th:text="${pub.titulo}"></span>
+                            </h5>
+                            <p class="card-text text-muted small mb-0 descricao-publicacao"
+                               style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;"
+                               th:text="${pub.descricao}"></p>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <button class="btn btn-primary btn-sm"
+                                        th:attr="data-id=${pub.idPublicacao},
+                     data-titulo=${pub.titulo},
+                     data-descricao=${pub.descricao},
+                     data-conteudo=${pub.conteudo},
+                     data-tipo=${pub.tipoConteudo.name()},
+                     data-data=${#temporals.format(pub.dataCriacao, 'dd/MM/yyyy HH') + 'h' + #temporals.format(pub.dataCriacao, 'mm')}"
+                                        onclick="abrirModalPublicacao(this)">
+                                    Ver mais →
+                                </button>
+
+                                <div th:if="${hierarquia == 1}" class="dropdown">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary border-0"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        <li>
+                                            <button type="button" class="dropdown-item"
+                                                    th:attr="onclick=|abrirModalEdicaoPublicacao(${pub.idPublicacao})|">
+                                                <i class="bi bi-pencil me-2 text-primary"></i>Editar
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <form th:action="@{/gestao/publicacoes/excluir/{id}(id=${pub.idPublicacao})}" method="post"
+                                                  onsubmit="return confirm('Remover esta publicação?')">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-trash me-2"></i>Remover
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="mensagemSemPublicacoes"
+                         class="text-center text-muted py-5"
+                         th:style="${publicacoes == null or publicacoes.empty} ? '' : 'display:none;'">
+                        <i class="bi bi-newspaper fs-1 d-block mb-2"></i>
+                        Nenhuma publicação encontrada.
+                    </div>
+                </div>
+
+                <nav class="mt-5" aria-label="Paginação">
+                    <ul class="pagination justify-content-center" id="paginacaoPublicacoes"></ul>
+                </nav>
+            </div>
+
+            <!-- SIDEBAR -->
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-semibold mb-3">Buscar</h6>
+                        <div class="input-group">
+                            <input type="text" id="inputBuscarPublicacoes" class="form-control form-control-sm" placeholder="Pesquisar publicações...">
+                            <button class="btn btn-primary btn-sm" id="btnBuscarPublicacoes" type="button"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-semibold mb-3">Próximos Eventos</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li th:each="ev : ${proximosEventos}" class="d-flex gap-3 mb-3">
+                                <div class="text-center bg-primary text-white rounded px-2 py-1"
+                                     style="min-width:48px;font-size:.8rem">
+                                    <div class="fw-bold lh-1"
+                                         th:text="${#temporals.format(ev.dataEvento, 'dd')}"></div>
+                                    <div style="font-size:.65rem"
+                                         th:text="${#temporals.format(ev.dataEvento, 'MMM').toUpperCase()}"></div>
+                                </div>
+                                <div>
+                                    <p class="mb-0 small fw-semibold lh-sm" th:text="${ev.titulo}"></p>
+                                    <small class="text-muted"
+                                           th:text="${ev.localEvento != null ? ev.localEvento : 'Local a confirmar'}"></small>
+                                </div>
+                            </li>
+                            <li th:if="${proximosEventos == null or proximosEventos.empty}"
+                                class="text-muted small">Nenhum evento próximo.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="fw-semibold mb-3">Tags</h6>
+                        <div class="d-flex flex-wrap gap-2" id="filtrosTipoTags">
+                            <button type="button" class="badge text-decoration-none bg-primary text-white border-0" data-tipo-filtro="TODOS" style="font-size:.75rem">Todos</button>
+                            <button type="button" class="badge text-decoration-none bg-light text-dark border" data-tipo-filtro="NOTICIA" style="font-size:.75rem">Notícias</button>
+                            <button type="button" class="badge text-decoration-none bg-light text-dark border" data-tipo-filtro="EVENTO" style="font-size:.75rem">Eventos</button>
+                            <button type="button" class="badge text-decoration-none bg-light text-dark border" data-tipo-filtro="ARTIGO" style="font-size:.75rem">Artigos</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão flutuante — somente Admin -->
+    <sec:authorize access="isAuthenticated()">
+        <div th:if="${hierarquia == 1}">
+            <button type="button"
+                    id="btnAbrirModalNovaPublicacao"
+                    class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                    style="position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;z-index:1050;font-size:1.5rem;"
+                    data-bs-toggle="modal" data-bs-target="#modalNovaPublicacao"
+                    title="Nova Publicação">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
+    </sec:authorize>
+
+</main>
+
+<!-- ══════════════════════════════════════════════
+     MODAL — Nova Publicação (somente Admin)
+══════════════════════════════════════════════ -->
+<sec:authorize access="isAuthenticated()">
+    <div th:if="${hierarquia == 1}">
+        <div class="modal fade" id="modalNovaPublicacao" tabindex="-1"
+             aria-labelledby="modalNovaPublicacaoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow">
+
+                    <!-- Header -->
+                    <div class="modal-header border-bottom py-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-plus text-primary fs-5"></i>
+                            <div>
+                                <h5 class="modal-title mb-0 fw-bold" id="modalNovaPublicacaoLabel">Nova Publicação</h5>
+                                <small class="text-muted" id="modalNovaPublicacaoSubtitulo">Preencha os campos abaixo para criar uma publicação</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="modal-body p-4">
+
+                        <!-- Alertas -->
+                        <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <span th:text="${sucesso}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span th:text="${erro}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form id="formNovaPublicacao"
+                              th:action="@{/gestao/publicacoes/salvar}"
+                              method="post"
+                              enctype="multipart/form-data">
+                            <input type="hidden" name="idPublicacao" id="modalIdPublicacao">
+
+                            <!-- Bloco 1: Informações Principais -->
+                            <div class="card border-0 bg-light mb-4">
+                                <div class="card-header bg-white border-bottom py-3 rounded-top">
+                                    <h6 class="mb-0 fw-semibold"><i class="bi bi-file-text me-2 text-primary"></i>Informações Principais</h6>
+                                </div>
+                                <div class="card-body p-3">
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                                        <input type="text" name="titulo" id="modalTituloPublicacao" class="form-control"
+                                               placeholder="Ex: ASSANDEF realiza evento de inclusão..."
+                                               maxlength="180" required />
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Tipo <span class="text-danger">*</span></label>
+                                            <select name="tipoConteudo" class="form-select" id="modalTipoConteudo" required>
+                                                <option value="" disabled>Selecione...</option>
+                                                <option th:each="tipo : ${tipos}" th:value="${tipo}" th:text="${tipo}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Descrição / Resumo <span class="text-danger">*</span></label>
+                                        <textarea name="descricao" id="modalDescricaoPublicacao" class="form-control" rows="3"
+                                                  placeholder="Breve resumo exibido nos cards de publicação..."
+                                                  required></textarea>
+                                    </div>
+
+                                    <div class="mb-1">
+                                        <label class="form-label fw-semibold">Conteúdo Completo</label>
+                                        <textarea name="conteudo" id="modalConteudoPublicacao" class="form-control" rows="6"
+                                                  placeholder="Texto completo da publicação (opcional)..."></textarea>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Bloco 2: Detalhes do Evento (aparece só quando tipo = EVENTO) -->
+                            <div class="card border-0 bg-light mb-4" id="modalCamposEvento" style="display:none!important;">
+                                <div class="card-header bg-white border-bottom py-3 rounded-top">
+                                    <h6 class="mb-0 fw-semibold"><i class="bi bi-calendar-event me-2 text-success"></i>Detalhes do Evento</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Data e Hora</label>
+                                            <input type="datetime-local" name="dataEvento" id="modalDataEvento" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Local</label>
+                                            <input type="text" name="localEvento" id="modalLocalEvento" class="form-control"
+                                                   placeholder="Ex: Sede da ASSANDEF" maxlength="255" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="modalImagensExistentesWrap" style="display:none;">
+                                <label class="form-label fw-semibold">Imagens atuais</label>
+                                <div id="modalImagensExistentes" class="d-flex flex-wrap gap-2"></div>
+                            </div>
+                            <div class="mb-3" id="modalVideosExistentesWrap" style="display:none;">
+                                <label class="form-label fw-semibold">Vídeos atuais</label>
+                                <ul id="modalVideosExistentes" class="mb-0 ps-3 small"></ul>
+                            </div>
+
+                            <!-- Bloco 3: Imagens -->
+                            <div class="card border-0 bg-light mb-4">
+                                <div class="card-header bg-white border-bottom py-3 rounded-top">
+                                    <h6 class="mb-0 fw-semibold">
+                                        <i class="bi bi-images me-2 text-warning"></i>Imagens
+                                        <small class="text-muted fw-normal">(máx. 10 — JPEG, PNG ou WebP — até 2 MB cada)</small>
+                                    </h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <input type="file" name="arquivos" id="modalInputImagens"
+                                           class="form-control mb-3"
+                                           accept="image/jpeg,image/png,image/webp" multiple />
+                                    <div id="modalPreviewImagens" class="d-flex flex-wrap gap-3"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bloco 4: Vídeos do YouTube -->
+                            <div class="card border-0 bg-light mb-2">
+                                <div class="card-header bg-white border-bottom py-3 rounded-top d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-semibold">
+                                        <i class="bi bi-youtube me-2 text-danger"></i>Vídeos do YouTube
+                                        <small class="text-muted fw-normal">(máx. 3)</small>
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="modalBtnAddVideo">
+                                        <i class="bi bi-plus-lg me-1"></i>Adicionar
+                                    </button>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div id="modalCamposVideo">
+                                        <div class="input-group mb-2 campo-video-modal">
+                                            <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                                            <input type="url" name="linksYoutube" class="form-control"
+                                                   placeholder="https://www.youtube.com/watch?v=..." />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" form="formNovaPublicacao" class="btn btn-primary px-4" id="modalBotaoSalvarPublicacao">
+                            <i class="bi bi-floppy me-1"></i>Salvar Publicação
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</sec:authorize>
+<div class="modal fade" id="modalVerPublicacao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+
+            <!-- Carrossel no topo (ocupa largura total) -->
+            <div id="mpCarrossel" class="carousel slide rounded-top overflow-hidden" data-bs-ride="false" style="display:none;max-height:380px;">
+                <div class="carousel-inner" id="mpCarrosselInner"></div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#mpCarrossel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#mpCarrossel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                <div class="carousel-indicators" id="mpIndicadores"></div>
+            </div>
+
+            <!-- Header -->
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <div class="w-100">
+                    <!-- Linha: badge + data + admin -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="mpBadge" class="badge fs-6 px-3 py-1"></span>
+                            <span class="text-muted small">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span id="mpData"></span>
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Botão ⋯ Admin -->
+                            <div th:if="${hierarquia == 1}" class="dropdown">
+                                <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-circle"
+                                        style="width:32px;height:32px;"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <li>
+                                        <button type="button" class="dropdown-item" id="mpLinkEditar">
+                                            <i class="bi bi-pencil me-2 text-primary"></i>Editar
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <form id="mpFormExcluir" method="post"
+                                              onsubmit="return confirm('Remover esta publicação?')">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-trash me-2"></i>Remover
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                    </div>
+
+                    <!-- Título grande -->
+                    <h2 id="mpTitulo" class="fw-bold lh-sm mb-0" style="font-size:1.5rem;"></h2>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 pt-3 pb-4">
+
+                <!-- Linha divisória com autor/local (preenchida via JS) -->
+                <div class="d-flex flex-wrap gap-3 align-items-center border-bottom pb-3 mb-4 text-muted small" id="mpMeta">
+                    <span id="mpMetaAutor" style="display:none;">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span id="mpAutorNome"></span>
+                    </span>
+                    <span id="mpMetaLocal" style="display:none;">
+                        <i class="bi bi-geo-alt me-1"></i>
+                        <span id="mpLocalEvento"></span>
+                    </span>
+                    <span id="mpMetaDataEvento" style="display:none;">
+                        <i class="bi bi-clock me-1"></i>
+                        <span id="mpDataEvento"></span>
+                    </span>
+                </div>
+
+                <!-- Descrição em destaque -->
+                <p id="mpDescricao" class="lead text-secondary mb-4"
+                   style="font-size:1rem;border-left:4px solid #0d6efd;padding-left:1rem;"></p>
+
+                <!-- Conteúdo completo -->
+                <div id="mpConteudoWrap" style="display:none;">
+                    <p id="mpConteudo" class="text-dark"
+                       style="white-space:pre-line;line-height:1.85;font-size:.97rem;"></p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/base :: rodape}"></footer>
+<div th:replace="~{fragments/base :: scriptsPadrao}"></div>
+
+<style>
+    #listaPublicacoes .publicacao-card {
+      position: relative;
+      z-index: 1;
+    }
+    #listaPublicacoes .publicacao-card.dropdown-open {
+      z-index: 40;
+    }
+    #listaPublicacoes .publicacao-card .dropdown-menu {
+      z-index: 1065;
+    }
+</style>
+
+<script>
+    const modalNovaPublicacaoEl = document.getElementById('modalNovaPublicacao');
+    const formNovaPublicacao = document.getElementById('formNovaPublicacao');
+    const modalTitulo = document.getElementById('modalNovaPublicacaoLabel');
+    const modalSubtitulo = document.getElementById('modalNovaPublicacaoSubtitulo');
+    const modalBotaoSalvar = document.getElementById('modalBotaoSalvarPublicacao');
+    const modalTipoConteudo = document.getElementById('modalTipoConteudo');
+    const modalIdPublicacao = document.getElementById('modalIdPublicacao');
+    const modalTituloPublicacao = document.getElementById('modalTituloPublicacao');
+    const modalDescricaoPublicacao = document.getElementById('modalDescricaoPublicacao');
+    const modalConteudoPublicacao = document.getElementById('modalConteudoPublicacao');
+    const modalDataEvento = document.getElementById('modalDataEvento');
+    const modalLocalEvento = document.getElementById('modalLocalEvento');
+    const modalCamposEvento = document.getElementById('modalCamposEvento');
+    const modalInputImagens = document.getElementById('modalInputImagens');
+    const modalPreviewImagens = document.getElementById('modalPreviewImagens');
+    const modalBtnAddVideo = document.getElementById('modalBtnAddVideo');
+    const modalCamposVideo = document.getElementById('modalCamposVideo');
+    const modalImagensExistentesWrap = document.getElementById('modalImagensExistentesWrap');
+    const modalImagensExistentes = document.getElementById('modalImagensExistentes');
+    const modalVideosExistentesWrap = document.getElementById('modalVideosExistentesWrap');
+    const modalVideosExistentes = document.getElementById('modalVideosExistentes');
+
+    const escaparValorAtributo = (valor) => (valor || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
+    const blocoCampoVideoVazio = () => `
+      <div class="input-group mb-2 campo-video-modal">
+        <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+        <input type="url" name="linksYoutube" class="form-control"
+               placeholder="https://www.youtube.com/watch?v=..." />
+      </div>`;
+
+    const blocoCampoVideoComRemocao = (valor = '') => `
+      <div class="input-group mb-2 campo-video-modal">
+        <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+        <input type="url" name="linksYoutube" class="form-control"
+               value="${escaparValorAtributo(valor)}"
+               placeholder="https://www.youtube.com/watch?v=..." />
+        <button type="button" class="btn btn-outline-danger remover-video-modal">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>`;
+
+    let modoEdicaoAtivo = false;
+
+    modalTipoConteudo?.addEventListener('change', function () {
+      modalCamposEvento.style.display = this.value === 'EVENTO' ? 'block' : 'none';
+    });
+
+    const atualizarEstadoBotaoAddVideo = () => {
+      const total = modalCamposVideo?.querySelectorAll('.campo-video-modal').length || 0;
+      if (modalBtnAddVideo) {
+        modalBtnAddVideo.disabled = total >= 3;
+      }
+    };
+
+    const limparMidiasExistentes = () => {
+      if (modalImagensExistentes) {
+        modalImagensExistentes.innerHTML = '';
+      }
+      if (modalVideosExistentes) {
+        modalVideosExistentes.innerHTML = '';
+      }
+      if (modalImagensExistentesWrap) {
+        modalImagensExistentesWrap.style.display = 'none';
+      }
+      if (modalVideosExistentesWrap) {
+        modalVideosExistentesWrap.style.display = 'none';
+      }
+    };
+
+    const resetarCamposVideo = () => {
+      if (!modalCamposVideo) {
+        return;
+      }
+      modalCamposVideo.innerHTML = blocoCampoVideoVazio();
+      atualizarEstadoBotaoAddVideo();
+    };
+
+    const limparModalPublicacao = () => {
+      formNovaPublicacao?.reset();
+      modoEdicaoAtivo = false;
+      if (modalIdPublicacao) {
+        modalIdPublicacao.value = '';
+      }
+      if (modalTipoConteudo) {
+        modalTipoConteudo.value = '';
+      }
+      if (modalCamposEvento) {
+        modalCamposEvento.style.display = 'none';
+      }
+      if (modalDataEvento) {
+        modalDataEvento.value = '';
+      }
+      if (modalLocalEvento) {
+        modalLocalEvento.value = '';
+      }
+      if (modalInputImagens) {
+        modalInputImagens.value = '';
+      }
+      if (modalPreviewImagens) {
+        modalPreviewImagens.innerHTML = '';
+      }
+      limparMidiasExistentes();
+      resetarCamposVideo();
+      if (modalTitulo) {
+        modalTitulo.textContent = 'Nova Publicação';
+      }
+      if (modalSubtitulo) {
+        modalSubtitulo.textContent = 'Preencha os campos abaixo para criar uma publicação';
+      }
+      if (modalBotaoSalvar) {
+        modalBotaoSalvar.innerHTML = '<i class="bi bi-floppy me-1"></i>Salvar Publicação';
+      }
+    };
+
+    const preencherDataEventoInput = (dataEventoIso) => {
+      if (!modalDataEvento) {
+        return;
+      }
+      if (!dataEventoIso) {
+        modalDataEvento.value = '';
+        return;
+      }
+      modalDataEvento.value = String(dataEventoIso).slice(0, 16);
+    };
+
+    const preencherMidiasExistentes = (pub) => {
+      const imagens = Array.isArray(pub.imagens) ? pub.imagens : [];
+      const videos = Array.isArray(pub.videos) ? pub.videos : [];
+
+      if (modalImagensExistentes && modalImagensExistentesWrap) {
+        modalImagensExistentes.innerHTML = '';
+        if (imagens.length > 0) {
+          imagens.forEach((src, idx) => {
+            modalImagensExistentes.insertAdjacentHTML('beforeend', `
+              <img src="/${src}" class="rounded border" style="width:90px;height:70px;object-fit:cover;" alt="Imagem ${idx + 1}">
+            `);
+          });
+          modalImagensExistentesWrap.style.display = '';
+        } else {
+          modalImagensExistentesWrap.style.display = 'none';
+        }
+      }
+
+      if (modalVideosExistentes && modalVideosExistentesWrap) {
+        modalVideosExistentes.innerHTML = '';
+        if (videos.length > 0) {
+          videos.forEach((url) => {
+            const item = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.className = 'text-decoration-none';
+            link.textContent = url;
+            item.appendChild(link);
+            modalVideosExistentes.appendChild(item);
+          });
+          modalVideosExistentesWrap.style.display = '';
+        } else {
+          modalVideosExistentesWrap.style.display = 'none';
+        }
+      }
+    };
+
+    const preencherCamposVideo = (videos) => {
+      if (!modalCamposVideo) {
+        return;
+      }
+      const lista = Array.isArray(videos)
+              ? videos.filter((v) => v && String(v).trim() !== '').slice(0, 3)
+              : [];
+      modalCamposVideo.innerHTML = '';
+      if (!lista.length) {
+        modalCamposVideo.innerHTML = blocoCampoVideoVazio();
+      } else {
+        lista.forEach((url) => {
+          modalCamposVideo.insertAdjacentHTML('beforeend', blocoCampoVideoComRemocao(url));
+        });
+      }
+      atualizarEstadoBotaoAddVideo();
+    };
+
+    async function abrirModalEdicaoPublicacao(id) {
+      try {
+        const resposta = await fetch('/publicacoes/' + id + '/json');
+        if (!resposta.ok) {
+          throw new Error('Falha ao carregar publicação');
+        }
+        const pub = await resposta.json();
+
+        limparModalPublicacao();
+        modoEdicaoAtivo = true;
+        if (modalIdPublicacao) {
+          modalIdPublicacao.value = pub.id || id;
+        }
+        if (modalTituloPublicacao) {
+          modalTituloPublicacao.value = pub.titulo || '';
+        }
+        if (modalDescricaoPublicacao) {
+          modalDescricaoPublicacao.value = pub.descricao || '';
+        }
+        if (modalConteudoPublicacao) {
+          modalConteudoPublicacao.value = pub.conteudo || '';
+        }
+        if (modalTipoConteudo) {
+          modalTipoConteudo.value = pub.tipo || '';
+        }
+        if (modalCamposEvento) {
+          modalCamposEvento.style.display = pub.tipo === 'EVENTO' ? 'block' : 'none';
+        }
+        if (modalLocalEvento) {
+          modalLocalEvento.value = pub.localEvento || '';
+        }
+        preencherDataEventoInput(pub.dataEventoIso);
+        preencherCamposVideo(pub.videos || []);
+        preencherMidiasExistentes(pub);
+
+        if (modalTitulo) {
+          modalTitulo.textContent = 'Editar Publicação';
+        }
+        if (modalSubtitulo) {
+          modalSubtitulo.textContent = 'Atualize os dados da publicação selecionada';
+        }
+        if (modalBotaoSalvar) {
+          modalBotaoSalvar.innerHTML = '<i class="bi bi-floppy me-1"></i>Salvar Alterações';
+        }
+
+        bootstrap.Modal.getOrCreateInstance(modalNovaPublicacaoEl).show();
+      } catch (e) {
+        alert('Não foi possível carregar a publicação para edição.');
+      }
+    }
+
+    window.abrirModalEdicaoPublicacao = abrirModalEdicaoPublicacao;
+
+    modalInputImagens?.addEventListener('change', function () {
+      modalPreviewImagens.innerHTML = '';
+      const arquivos = Array.from(this.files);
+      if (arquivos.length > 10) {
+        alert('Selecione no máximo 10 imagens.');
+        this.value = '';
+        return;
+      }
+      arquivos.forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          modalPreviewImagens.innerHTML += `
+            <div class="position-relative" style="width:110px;">
+              <img src="${e.target.result}" class="rounded border"
+                   style="width:110px;height:82px;object-fit:cover;" />
+              <span class="position-absolute top-0 start-0 badge bg-primary m-1"
+                    style="font-size:10px;">${i === 0 ? 'Principal' : 'Imagem ' + (i + 1)}</span>
+            </div>`;
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    modalBtnAddVideo?.addEventListener('click', function () {
+      const total = modalCamposVideo.querySelectorAll('.campo-video-modal').length;
+      if (total >= 3) {
+        atualizarEstadoBotaoAddVideo();
+        return;
+      }
+      modalCamposVideo.insertAdjacentHTML('beforeend', blocoCampoVideoComRemocao(''));
+      atualizarEstadoBotaoAddVideo();
+    });
+
+    modalCamposVideo?.addEventListener('click', function (e) {
+      if (e.target.closest('.remover-video-modal')) {
+        e.target.closest('.campo-video-modal').remove();
+        if (!modalCamposVideo.querySelector('.campo-video-modal')) {
+          modalCamposVideo.innerHTML = blocoCampoVideoVazio();
+        }
+        atualizarEstadoBotaoAddVideo();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnAbrirModalNovaPublicacao')?.addEventListener('click', () => {
+        limparModalPublicacao();
+      });
+      limparModalPublicacao();
+      const temAlerta = document.querySelector('.alert-danger, .alert-success');
+      if (temAlerta) {
+        const modal = new bootstrap.Modal(modalNovaPublicacaoEl);
+        modal?.show();
+      }
+    });
+
+    // ── Busca, filtros por tags e paginação ───────────────────
+    (function () {
+      const LIMITE_POR_PAGINA = 7;
+      const cards = Array.from(document.querySelectorAll('#listaPublicacoes .publicacao-card'));
+      const filtroTopo = document.getElementById('filtrosTipoTopo');
+      const filtroTags = document.getElementById('filtrosTipoTags');
+      const inputBusca = document.getElementById('inputBuscarPublicacoes');
+      const btnBusca = document.getElementById('btnBuscarPublicacoes');
+      const paginacao = document.getElementById('paginacaoPublicacoes');
+      const semResultados = document.getElementById('mensagemSemPublicacoes');
+      if (!cards.length || !paginacao) {
+        return;
+      }
+
+      let tipoAtual = 'TODOS';
+      let termoAtual = '';
+      let paginaAtual = 1;
+
+      const atualizarBotoesTipo = () => {
+        document.querySelectorAll('[data-tipo-filtro]').forEach((btn) => {
+          const ativo = btn.dataset.tipoFiltro === tipoAtual;
+          if (btn.closest('#filtrosTipoTopo')) {
+            btn.classList.remove('btn-primary', 'btn-outline-primary', 'active');
+            btn.classList.add(ativo ? 'btn-primary' : 'btn-outline-primary');
+            if (ativo) {
+              btn.classList.add('active');
+            }
+          }
+          if (btn.closest('#filtrosTipoTags')) {
+            btn.classList.remove('bg-primary', 'text-white', 'bg-light', 'text-dark', 'border');
+            if (ativo) {
+              btn.classList.add('bg-primary', 'text-white');
+            } else {
+              btn.classList.add('bg-light', 'text-dark', 'border');
+            }
+          }
+        });
+      };
+
+      const obterFiltrados = () => cards.filter((card) => {
+        const tipo = card.dataset.tipo || '';
+        const tipoOk = tipoAtual === 'TODOS' || tipo === tipoAtual;
+        if (!tipoOk) {
+          return false;
+        }
+        if (!termoAtual) {
+          return true;
+        }
+        const textoCard = card.textContent.toLowerCase();
+        return textoCard.includes(termoAtual);
+      });
+
+      const renderizarPaginacao = (totalPaginas) => {
+        paginacao.innerHTML = '';
+        if (totalPaginas <= 1) {
+          return;
+        }
+
+        const criarItem = (label, destino, desabilitado, ativo) => {
+          const li = document.createElement('li');
+          li.className = 'page-item' + (desabilitado ? ' disabled' : '') + (ativo ? ' active' : '');
+          const a = document.createElement('a');
+          a.className = 'page-link';
+          a.href = '#';
+          a.textContent = label;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (desabilitado || destino === paginaAtual) {
+              return;
+            }
+            paginaAtual = destino;
+            renderizar();
+          });
+          li.appendChild(a);
+          paginacao.appendChild(li);
+        };
+
+        criarItem('«', paginaAtual - 1, paginaAtual === 1, false);
+        for (let p = 1; p <= totalPaginas; p++) {
+          criarItem(String(p), p, false, p === paginaAtual);
+        }
+        criarItem('»', paginaAtual + 1, paginaAtual === totalPaginas, false);
+      };
+
+      const renderizar = () => {
+        const filtrados = obterFiltrados();
+        const totalPaginas = Math.max(1, Math.ceil(filtrados.length / LIMITE_POR_PAGINA));
+        if (paginaAtual > totalPaginas) {
+          paginaAtual = totalPaginas;
+        }
+
+        cards.forEach((card) => {
+          card.style.display = 'none';
+        });
+
+        const inicio = (paginaAtual - 1) * LIMITE_POR_PAGINA;
+        const fim = inicio + LIMITE_POR_PAGINA;
+        filtrados.slice(inicio, fim).forEach((card) => {
+          card.style.display = '';
+        });
+
+        if (semResultados) {
+          semResultados.style.display = filtrados.length === 0 ? '' : 'none';
+        }
+
+        renderizarPaginacao(totalPaginas);
+        atualizarBotoesTipo();
+      };
+
+      const aplicarBusca = () => {
+        termoAtual = (inputBusca?.value || '').trim().toLowerCase();
+        paginaAtual = 1;
+        renderizar();
+      };
+
+      const tratarCliqueFiltro = (e) => {
+        const btn = e.target.closest('[data-tipo-filtro]');
+        if (!btn) {
+          return;
+        }
+        tipoAtual = btn.dataset.tipoFiltro || 'TODOS';
+        paginaAtual = 1;
+        renderizar();
+      };
+
+      filtroTopo?.addEventListener('click', tratarCliqueFiltro);
+      filtroTags?.addEventListener('click', tratarCliqueFiltro);
+      btnBusca?.addEventListener('click', aplicarBusca);
+      inputBusca?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          aplicarBusca();
+        }
+      });
+      inputBusca?.addEventListener('input', aplicarBusca);
+
+      renderizar();
+    })();
+
+    document.addEventListener('show.bs.dropdown', function (event) {
+      const card = event.target.closest('.publicacao-card');
+      if (card) {
+        card.classList.add('dropdown-open');
+      }
+    });
+
+    document.addEventListener('hide.bs.dropdown', function (event) {
+      const card = event.target.closest('.publicacao-card');
+      if (card) {
+        card.classList.remove('dropdown-open');
+      }
+    });
+
+    // Dados das imagens por publicação (populados pelo Thymeleaf)
+const imagensPorPublicacao = /*[[${imagensPorPublicacaoJson}]]*/ {};
+
+function normalizarYoutubeEmbed(url) {
+    if (!url) {
+        return null;
+    }
+    try {
+        const parsed = new URL(url);
+        let videoId = '';
+        if (parsed.hostname.includes('youtu.be')) {
+            videoId = parsed.pathname.replace('/', '');
+        } else if (parsed.pathname.includes('/shorts/')) {
+            videoId = parsed.pathname.split('/shorts/')[1] || '';
+        } else if (parsed.pathname.includes('/embed/')) {
+            videoId = parsed.pathname.split('/embed/')[1] || '';
+        } else {
+            videoId = parsed.searchParams.get('v') || '';
+        }
+        videoId = videoId.split('/')[0].split('?')[0].split('&')[0].trim();
+        if (!/^[a-zA-Z0-9_-]{6,}$/.test(videoId)) {
+            return null;
+        }
+        return 'https://www.youtube.com/embed/' + videoId;
+    } catch (e) {
+        return null;
+    }
+}
+
+async function abrirModalPublicacao(btn) {
+    const id = btn.dataset.id;
+
+    const res = await fetch('/publicacoes/' + id + '/json');
+    const pub = await res.json();
+
+    // Badge
+    const badge = document.getElementById('mpBadge');
+    const cores = { NOTICIA: ['bg-primary','Notícia'], EVENTO: ['bg-success','Evento'], ARTIGO: ['bg-secondary','Artigo'] };
+    const [cls, label] = cores[pub.tipo] || ['bg-secondary', pub.tipo];
+    badge.className = 'badge fs-6 px-3 py-1 ' + cls;
+    if (pub.tipo === 'ARTIGO') { badge.className = 'badge fs-6 px-3 py-1'; badge.style.backgroundColor = '#6f42c1'; }
+    badge.textContent = label;
+
+    // Cabeçalho
+    document.getElementById('mpData').textContent   = pub.data;
+    document.getElementById('mpTitulo').textContent = pub.titulo;
+
+    // Descrição em destaque
+    document.getElementById('mpDescricao').textContent = pub.descricao || '';
+
+    // Conteúdo completo
+    const conteudo = pub.conteudo && pub.conteudo.trim() !== '' ? pub.conteudo : null;
+    const conteudoWrap = document.getElementById('mpConteudoWrap');
+    if (conteudo) {
+        document.getElementById('mpConteudo').textContent = conteudo;
+        conteudoWrap.style.display = 'block';
+    } else {
+        conteudoWrap.style.display = 'none';
+    }
+
+    // Meta: local e data do evento
+    const metaLocal = document.getElementById('mpMetaLocal');
+    const metaDataEvento = document.getElementById('mpMetaDataEvento');
+    if (pub.localEvento) {
+        document.getElementById('mpLocalEvento').textContent = pub.localEvento;
+        metaLocal.style.display = 'inline';
+    } else { metaLocal.style.display = 'none'; }
+
+    if (pub.dataEvento) {
+        document.getElementById('mpDataEvento').textContent = pub.dataEvento;
+        metaDataEvento.style.display = 'inline';
+    } else { metaDataEvento.style.display = 'none'; }
+
+    // Links admin
+    const linkEditar  = document.getElementById('mpLinkEditar');
+    const formExcluir = document.getElementById('mpFormExcluir');
+    if (linkEditar) {
+        linkEditar.onclick = () => {
+            bootstrap.Modal.getInstance(document.getElementById('modalVerPublicacao'))?.hide();
+            abrirModalEdicaoPublicacao(id);
+        };
+    }
+    if (formExcluir) formExcluir.action = '/gestao/publicacoes/excluir/' + id;
+
+    // Carrossel
+    const inner       = document.getElementById('mpCarrosselInner');
+    const indicadores = document.getElementById('mpIndicadores');
+    const carrossel   = document.getElementById('mpCarrossel');
+    inner.innerHTML       = '';
+    indicadores.innerHTML = '';
+
+    if (pub.imagens && pub.imagens.length > 0) {
+        carrossel.style.display = 'block';
+        pub.imagens.forEach((src, i) => {
+            inner.innerHTML += `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <img src="/${src}" class="d-block w-100"
+                         style="max-height:380px;object-fit:cover;" alt="Imagem ${i+1}">
+                </div>`;
+            indicadores.innerHTML += `
+                <button type="button" data-bs-target="#mpCarrossel"
+                        data-bs-slide-to="${i}"
+                        class="${i === 0 ? 'active' : ''}"></button>`;
+        });
+    }
+
+    if (pub.videos && pub.videos.length > 0) {
+        const inicioVideo = pub.imagens ? pub.imagens.length : 0;
+        pub.videos.forEach((url, i) => {
+            const embed = normalizarYoutubeEmbed(url);
+            if (!embed) {
+                return;
+            }
+            const idx = inicioVideo + i;
+            inner.innerHTML += `
+                <div class="carousel-item ${idx === 0 ? 'active' : ''}">
+                    <div class="ratio ratio-16x9" style="max-height:380px;background:#000;">
+                        <iframe src="${embed}" title="Vídeo ${i+1}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+                </div>`;
+            indicadores.innerHTML += `
+                <button type="button" data-bs-target="#mpCarrossel"
+                        data-bs-slide-to="${idx}"
+                        class="${idx === 0 ? 'active' : ''}"></button>`;
+        });
+    }
+
+    if (inner.children.length > 0) {
+        carrossel.style.display = 'block';
+    } else {
+        carrossel.style.display = 'none';
+    }
+
+    new bootstrap.Modal(document.getElementById('modalVerPublicacao')).show();
+}
+</script>
+
+</body>
+</html>

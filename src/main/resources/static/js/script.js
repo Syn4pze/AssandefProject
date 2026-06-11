@@ -11,7 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("scroll", handleScroll);
   }
 });
-
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        // Página veio do cache — força reinicialização
+        window.location.reload();
+    }
+});
 document.addEventListener("DOMContentLoaded", function () {
   const navbar = document.getElementById("navbar");
   if (navbar) {
@@ -22,22 +27,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Adicione este script no final da página ou no bloco de scripts existente
 
-document.getElementById('relatorioForm').addEventListener('submit', function(e) {
-    const formato = document.querySelector('input[name="formato"]:checked').value;
+const relatorioForm = document.getElementById('relatorioForm');
+if (relatorioForm) {
+    relatorioForm.addEventListener('submit', function(e) {
+        const formatoSelecionado = document.querySelector('input[name="formato"]:checked');
+        const formato = formatoSelecionado ? formatoSelecionado.value : null;
 
-    // Se for CSV, intercepta o envio e gera no frontend
-    if (formato === 'csv') {
-        e.preventDefault();
-        gerarRelatorioCSV();
-    }else if (formato === 'pdf') {
-             // Ajuste a action do form para o endpoint PDF
-             this.action = '/almoxarifado/relatorio/gerar-pdf';
-             // deixa o form submeter normalmente
-         }
-    // Se for PDF, deixa o formulário seguir normalmente para o backend
-});
+        if (formato === 'csv') {
+            e.preventDefault();
+            gerarRelatorioCSV();
+        } else if (formato === 'pdf') {
+            this.action = '/almoxarifado/relatorio/gerar-pdf';
+        }
+    });
+}
 
 function gerarRelatorioCSV() {
     const tipo = document.getElementById('relatorioTipo').value;
@@ -123,13 +127,16 @@ function downloadCSV(csvContent, filename) {
     document.body.removeChild(link);
 }
 
-document.getElementById('formGerarRelatorio').addEventListener('submit', function(e) {
-  const tipo = this.tipo.value;
-  if (!tipo) {
-    e.preventDefault();
-    alert('Por favor, selecione o tipo de relatório.');
-  }
-});
+const formGerarRelatorio = document.getElementById('formGerarRelatorio');
+if (formGerarRelatorio) {
+  formGerarRelatorio.addEventListener('submit', function(e) {
+    const tipo = this.tipo.value;
+    if (!tipo) {
+      e.preventDefault();
+      alert('Por favor, selecione o tipo de relatório.');
+    }
+  });
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     const inputData = document.getElementById('dataRelatorioDia');
