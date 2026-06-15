@@ -1744,3 +1744,274 @@ html {
     width: 100%;
   }
 }
+
+=========================================================
+Módulo de Aluguel do Salão - Página pública
+=========================================================
+*/
+.salao-page {
+  background:
+    radial-gradient(circle at top left, rgba(161, 168, 212, 0.28), transparent 30rem),
+    linear-gradient(180deg, #f7f8fc 0%, #ffffff 45%, #f7f8fc 100%);
+  overflow-x: hidden;
+}
+
+.salao-hero {
+  padding: calc(var(--header-altura) + 4rem) 0 4rem;
+  position: relative;
+}
+
+.salao-hero-title {
+  font-size: clamp(3.2rem, 8vw, 6.4rem);
+  line-height: 0.95;
+  font-weight: 900;
+  color: var(--cor-primaria-escura);
+  letter-spacing: -0.07em;
+  margin-bottom: 1.3rem;
+}
+
+.salao-hero-frase {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 750;
+  line-height: 1.25;
+  color: var(--cor-texto);
+  max-width: 740px;
+  margin-bottom: 1.4rem;
+}
+
+.salao-hero-text {
+  color: #4d5a6d;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  max-width: 740px;
+  margin-bottom: 2rem;
+}
+
+.salao-hero-card,
+.salao-feature-card,
+.salao-form-info-card,
+.salao-form-card {
+  background-color: #ffffff;
+  border-radius: 1.6rem;
+  padding: 2rem;
+  box-shadow: 0 12px 40px rgba(30, 42, 59, 0.08);
+  border: 1px solid rgba(59, 74, 141, 0.08);
+}
+
+.salao-hero-card {
+  min-height: 390px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.salao-hero-card-icon {
+  width: 78px;
+  height: 78px;
+  border-radius: 1.4rem;
+  background-color: rgba(59, 74, 141, 0.1);
+  color: var(--cor-primaria-escura);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin-bottom: 1.3rem;
+}
+
+.salao-hero-card h2,
+.salao-form-info-card h2,
+.salao-feature-card h3 {
+  color: var(--cor-primaria-escura);
+  font-weight: 850;
+}
+
+.salao-info-list {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.2rem;
+}
+
+.salao-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background-color: rgba(161, 168, 212, 0.12);
+  padding: 1rem;
+  border-radius: 1rem;
+  color: #3d4858;
+  line-height: 1.5;
+}
+
+.salao-info-item i {
+  color: var(--cor-primaria-escura);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.salao-feature-card {
+  transition: all 0.25s ease;
+}
+
+.salao-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(59, 74, 141, 0.14);
+}
+
+.salao-feature-card i {
+  font-size: 2.4rem;
+  color: var(--cor-primaria-escura);
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.salao-feature-card p,
+.salao-form-info-card p {
+  color: #5d6878;
+  line-height: 1.7;
+}
+
+.salao-photo-placeholder {
+  min-height: 260px;
+  border-radius: 1.6rem;
+  background:
+    linear-gradient(135deg, rgba(59, 74, 141, 0.14), rgba(161, 168, 212, 0.28)),
+    #ffffff;
+  border: 2px dashed rgba(59, 74, 141, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  color: var(--cor-primaria-escura);
+  font-weight: 800;
+  box-shadow: 0 12px 40px rgba(30, 42, 59, 0.06);
+}
+
+.salao-photo-placeholder i {
+  font-size: 3rem;
+}
+
+.salao-disponibilidade-card {
+  display: grid;
+  gap: 0.7rem;
+  height: 100%;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 2px solid rgba(59, 74, 141, 0.08);
+  border-radius: 1.4rem;
+  padding: 1.4rem;
+  box-shadow: 0 12px 35px rgba(30, 42, 59, 0.07);
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.salao-disponibilidade-card:hover,
+.salao-disponibilidade-card:has(input:checked) {
+  transform: translateY(-4px);
+  border-color: var(--cor-primaria-escura);
+  box-shadow: 0 18px 42px rgba(59, 74, 141, 0.14);
+}
+
+.salao-disponibilidade-radio {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+}
+
+.salao-disponibilidade-date {
+  color: var(--cor-primaria-escura);
+  font-size: 1.35rem;
+  font-weight: 850;
+  padding-right: 2rem;
+}
+
+.salao-disponibilidade-time {
+  color: #4d5a6d;
+  font-weight: 700;
+}
+
+.salao-disponibilidade-action {
+  width: fit-content;
+  margin-top: 0.3rem;
+  color: var(--cor-primaria-escura);
+  background-color: rgba(161, 168, 212, 0.18);
+  font-weight: 800;
+  font-size: 0.86rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+}
+
+.salao-form-info-card {
+  top: calc(var(--header-altura) + 1.5rem);
+}
+
+.salao-valor-box {
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(135deg, rgba(59, 74, 141, 0.95), rgba(59, 74, 141, 0.78)),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.28), transparent 20rem);
+  color: #ffffff;
+}
+
+.salao-valor-box span,
+.salao-valor-box small {
+  display: block;
+  opacity: 0.9;
+}
+
+.salao-valor-box strong {
+  display: block;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.1;
+  margin: 0.4rem 0;
+}
+
+.salao-form-card .form-label {
+  font-weight: 700;
+  color: #3d4858;
+}
+
+.salao-form-card .form-control,
+.salao-form-card .form-select {
+  border-radius: 0.85rem;
+  border-color: rgba(59, 74, 141, 0.18);
+}
+
+.salao-form-card textarea.form-control {
+  min-height: 150px;
+}
+
+@media (max-width: 991.98px) {
+  .salao-hero {
+    padding-top: calc(var(--header-altura) + 3rem);
+  }
+
+  .salao-hero-card {
+    min-height: auto;
+  }
+
+  .salao-form-info-card {
+    position: static !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .salao-hero-title {
+    letter-spacing: -0.05em;
+  }
+
+  .salao-hero-text,
+  .salao-form-info-card p,
+  .salao-feature-card p {
+    font-size: 0.98rem;
+  }
+
+  .salao-hero-card,
+  .salao-feature-card,
+  .salao-form-info-card,
+  .salao-form-card {
+    padding: 1.4rem;
+  }
+}

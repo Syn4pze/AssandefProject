@@ -32,6 +32,9 @@
                 <a th:href="@{/doadores/newdonation}" class="btn btn-outline-light btn-lg">
                   <i class="bi bi-heart-pulse me-2"></i>Apoiar agora
                 </a>
+                <a th:href="@{/aluguel-salao}" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-calendar2-event me-2"></i>Alugar salão
+                </a>
               </div>
             </div>
           </div>
@@ -51,6 +54,9 @@
                 </a>
                 <a th:href="@{/sobre#atividades}" class="btn btn-outline-light btn-lg">
                   <i class="bi bi-grid-3x3-gap me-2"></i>Explorar atividades
+                </a>
+                <a th:href="@{/aluguel-salao}" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-calendar2-event me-2"></i>Aluguel do salão
                 </a>
               </div>
             </div>
@@ -78,7 +84,7 @@
       </div>
 
       <div class="row g-4">
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-3">
           <article class="home-pillar-card h-100">
             <div class="home-pillar-icon">
               <i class="bi bi-heart-pulse"></i>
@@ -88,7 +94,7 @@
           </article>
         </div>
 
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-3">
           <article class="home-pillar-card h-100">
             <div class="home-pillar-icon">
               <i class="bi bi-people"></i>
@@ -98,13 +104,26 @@
           </article>
         </div>
 
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-3">
           <article class="home-pillar-card h-100">
             <div class="home-pillar-icon">
               <i class="bi bi-shield-check"></i>
             </div>
             <h3>Defesa de direitos</h3>
             <p>Atuação institucional para ampliar acessibilidade, cidadania e representatividade das pessoas com deficiência.</p>
+          </article>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <article class="home-pillar-card h-100">
+            <div class="home-pillar-icon">
+              <i class="bi bi-calendar2-event"></i>
+            </div>
+            <h3>Aluguel do salão</h3>
+            <p>Consulte datas e horários disponíveis para realizar seu evento no espaço da ASSANDEF.</p>
+            <a th:href="@{/aluguel-salao}" class="btn btn-outline-primary btn-sm mt-2">
+              <i class="bi bi-search me-1"></i>Ver disponibilidade
+            </a>
           </article>
         </div>
       </div>
@@ -171,6 +190,9 @@
         <div class="home-cta-actions">
           <a th:href="@{/doadores/newdonation}" class="btn btn-light btn-lg">
             <i class="bi bi-heart-fill me-2"></i>Quero apoiar
+          </a>
+          <a th:href="@{/aluguel-salao}" class="btn btn-outline-light btn-lg">
+            <i class="bi bi-calendar2-event me-2"></i>Alugar salão
           </a>
           <a th:href="@{/sobre}" class="btn btn-outline-light btn-lg">
             <i class="bi bi-info-circle me-2"></i>Saiba mais
