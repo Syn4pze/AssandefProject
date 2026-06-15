@@ -13,6 +13,113 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
+
+    <style>
+        /* Ajustes da navbar desktop */
+        @media (min-width: 992px) {
+            #navbar .navbar-collapse {
+                width: 100%;
+                display: flex !important;
+                align-items: center;
+                gap: 1.25rem;
+            }
+
+            #navbar .navbar-public-links,
+            #navbar .navbar-admin-links {
+                min-width: 0;
+            }
+
+            /* Ocupa melhor o espaço horizontal sem jogar tudo para o canto */
+            #navbar .navbar-public-links {
+                flex: 1 1 auto;
+                justify-content: flex-start;
+                gap: .45rem !important;
+            }
+
+            #navbar .navbar-admin-links {
+                flex: 0 0 auto;
+                margin-left: 1rem;
+                gap: .45rem !important;
+            }
+
+            /* Botões maiores e mais proporcionais */
+            #navbar .navbar-public-links > .nav-item > .nav-link,
+            #navbar .navbar-admin-links > .nav-item > .nav-link,
+            #navbar .navbar-admin-links > .nav-item.dropdown > .nav-link {
+                min-height: 44px;
+                min-width: 96px;
+                justify-content: center;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                font-size: 0.98rem;
+                white-space: nowrap;
+            }
+
+            #navbar .navbar-public-links > .nav-item:first-child > .nav-link {
+                min-width: 92px;
+            }
+
+            #navbar .navbar-public-links > .nav-item:nth-child(2) > .nav-link {
+                min-width: 132px;
+            }
+
+            #navbar .navbar-public-links > .nav-item:nth-child(4) > .nav-link {
+                min-width: 82px;
+            }
+
+            #navbar .navbar-admin-links .dropdown-toggle {
+                min-width: 120px;
+            }
+
+            #navbar .navbar-admin-links .nav-item:last-child .nav-link,
+            #navbar #perfilDropdown {
+                min-height: 44px;
+            }
+
+            /* Dropdown de módulos por hover */
+            #navbar .nav-hover-dropdown {
+                position: relative;
+            }
+
+            /* Ponte invisível entre o botão e o dropdown para não fechar ao mover o mouse para baixo */
+            #navbar .nav-hover-dropdown::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 100%;
+                height: 24px;
+                z-index: 1059;
+                pointer-events: auto;
+                background: transparent;
+            }
+
+            #navbar .nav-hover-dropdown > .dropdown-menu {
+                display: block;
+                visibility: hidden;
+                opacity: 0;
+                pointer-events: none;
+                margin-top: 0;
+                top: 100%;
+                left: 0;
+                transform: translateY(0);
+                transition: opacity 0.12s ease, visibility 0.12s ease;
+                z-index: 1060;
+            }
+
+            #navbar .nav-hover-dropdown:hover > .dropdown-menu,
+            #navbar .nav-hover-dropdown:focus-within > .dropdown-menu {
+                visibility: visible;
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            #navbar .nav-hover-dropdown:hover > .dropdown-toggle {
+                color: #0d6efd !important;
+                background-color: rgba(13, 110, 253, 0.10);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -39,8 +146,8 @@
             <!-- MENU DESKTOP -->
             <div class="navbar-collapse d-none d-lg-flex align-items-center" id="navbarNav">
 
-                <!-- LINKS ÚNICOS (visitante vê só estes 3; autenticado vê estes + os internos) -->
-                <ul class="navbar-nav align-items-center gap-1 m-0">
+                <!-- LINKS PÚBLICOS / INSTITUCIONAIS -->
+                <ul class="navbar-nav align-items-center gap-1 m-0 navbar-public-links">
 
                     <!-- Início — só autenticado -->
                     <li class="nav-item" sec:authorize="isAuthenticated()">
@@ -69,6 +176,7 @@
                         </a>
                     </li>
 
+                    <!-- SOS / Doadores — todos -->
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded text-danger fw-medium"
                            th:classappend="${ativa == 'sos'} ? 'bg-danger bg-opacity-10' : ''"
@@ -77,70 +185,102 @@
                         </a>
                     </li>
 
-                    <!-- Separador visual — só autenticado -->
-                    <li class="nav-item d-flex align-items-center px-1" sec:authorize="isAuthenticated()"
-                        aria-hidden="true">
-                        <span style="width:1px; height:20px; background:#dee2e6; display:block;"></span>
+                    <!-- Página pública do aluguel do salão — todos -->
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
+                           th:classappend="${ativa == 'aluguelSalaoPublico'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
+                           th:href="@{/aluguel-salao}">
+                            <i class="bi bi-calendar2-event"></i> Salão
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- LINKS ADMINISTRATIVOS + PERFIL -->
+                <ul class="navbar-nav align-items-center gap-1 navbar-admin-links">
+
+                    <!-- Dropdown de módulos — só autenticado -->
+                    <li class="nav-item dropdown nav-hover-dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 px-2 text-nowrap rounded"
+                           th:classappend="${ativa == 'almoxarifado' or ativa == 'atendimento' or ativa == 'pacientes' or ativa == 'financeiro' or ativa == 'doar' or ativa == 'aluguelSalao'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
+                           href="#"
+                           id="modulosDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="bi bi-grid-3x3-gap"></i> Módulos
+                        </a>
+
+                        <ul class="dropdown-menu shadow border-0 rounded-3 mt-0"
+                            aria-labelledby="modulosDropdown"
+                            style="min-width: 230px;">
+
+                            <li th:if="${hierarquia == 1 or hierarquia == 2 or hierarquia == 3}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                   th:href="@{/almoxarifado}">
+                                    <i class="bi bi-box-seam text-secondary"></i>
+                                    Almoxarifado
+                                </a>
+                            </li>
+
+                            <li th:if="${hierarquia == 1 or hierarquia == 2}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                   th:href="@{/atendimento}">
+                                    <i class="bi bi-clipboard2-pulse text-secondary"></i>
+                                    Atendimento
+                                </a>
+                            </li>
+
+                            <li th:if="${hierarquia == 1 or hierarquia == 2}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                   th:href="@{/pacientes}">
+                                    <i class="bi bi-people text-secondary"></i>
+                                    Pacientes
+                                </a>
+                            </li>
+
+                            <li th:if="${hierarquia == 1}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                   th:href="@{/financeiro}">
+                                    <i class="bi bi-cash-stack text-secondary"></i>
+                                    Financeiro
+                                </a>
+                            </li>
+
+                            <li th:if="${hierarquia == 1 or hierarquia == 3}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                   th:href="@{/doadores}">
+                                    <i class="bi bi-person-heart text-secondary"></i>
+                                    Afiliações
+                                </a>
+                            </li>
+
+                            <li th:if="${hierarquia == 1 or hierarquia == 2}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                   th:href="@{/aluguel-salao/gestao}">
+                                    <i class="bi bi-calendar2-event text-secondary"></i>
+                                    Aluguel do Salão
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
-                    <!-- LINKS INTERNOS — só autenticado -->
-                    <li class="nav-item" sec:authorize="isAuthenticated()"
-                        th:if="${hierarquia == 1 or hierarquia == 2 or hierarquia == 3}">
-                        <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
-                           th:classappend="${ativa == 'almoxarifado'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
-                           th:href="@{/almoxarifado}">
-                            <i class="bi bi-box-seam"></i> Almoxarifado
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()"
-                        th:if="${hierarquia == 1 or hierarquia == 2}">
-                        <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
-                           th:classappend="${ativa == 'atendimento'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
-                           th:href="@{/atendimento}">
-                            <i class="bi bi-clipboard2-pulse"></i> Atendimento
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()"
-                        th:if="${hierarquia == 1 or hierarquia == 2}">
-                        <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
-                           th:classappend="${ativa == 'pacientes'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
-                           th:href="@{/pacientes}">
-                            <i class="bi bi-people"></i> Pacientes
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()"
-                        th:if="${hierarquia == 1}">
-                        <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
-                           th:classappend="${ativa == 'financeiro'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
-                           th:href="@{/financeiro}">
-                            <i class="bi bi-cash-stack"></i> Financeiro
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()"
-                        th:if="${hierarquia == 1 or hierarquia == 3}">
-                        <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
-                           th:classappend="${ativa == 'doar'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
-                           th:href="@{/doadores}">
-                            <i class="bi bi-handshake"></i> Afiliações
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()"
-                        th:if="${hierarquia == 1}">
+                    <!-- Gestão de acesso — fora do dropdown, só administrador -->
+                    <li class="nav-item" sec:authorize="isAuthenticated()" th:if="${hierarquia == 1}">
                         <a class="nav-link d-flex align-items-center gap-2 px-2 text-nowrap rounded"
                            th:classappend="${ativa == 'gestao'} ? 'text-primary fw-bold bg-primary bg-opacity-10' : 'text-secondary'"
                            th:href="@{/funcionarios}">
                             <i class="bi bi-shield-lock"></i> Gestão
                         </a>
                     </li>
-                </ul>
 
-                <!-- ÁREA DIREITA -->
-                <ul class="navbar-nav align-items-center ms-auto">
+                    <!-- Acesso — visitante -->
                     <li class="nav-item" sec:authorize="!isAuthenticated()">
                         <a th:href="@{/login}" class="btn btn-primary btn-sm d-flex align-items-center gap-2 px-3">
                             <i class="bi bi-person-circle"></i> Acesso
                         </a>
                     </li>
+
+                    <!-- Perfil — autenticado -->
                     <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
                         <button class="nav-link dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 rounded border shadow-sm bg-white"
                                 id="perfilDropdown" type="button"
@@ -148,11 +288,11 @@
                                 style="cursor:pointer; min-height:40px;">
                             <i class="bi bi-person-circle fs-5 text-primary"></i>
                             <span class="d-flex flex-column align-items-start">
-                    <span class="fw-bold text-dark" style="font-size:13px; line-height:1.2;"
-                          sec:authentication="name">Usuário</span>
+                                <span class="fw-bold text-dark" style="font-size:13px; line-height:1.2;"
+                                      sec:authentication="name">Usuário</span>
                                 <span class="text-primary fw-medium" style="font-size:10px; line-height:1.2;"
                                       th:text="${hierarquia == 1} ? 'Administrador' : (${hierarquia == 2} ? 'Atendente' : 'Auxiliar')">
-                    </span>
+                                </span>
                             </span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2"
@@ -229,6 +369,13 @@
                         <span>Sobre a Assandef</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                       th:classappend="${ativa == 'aluguelSalao'} ? ' active' : ''"
+                       th:href="@{/aluguel-salao}">
+                        <i class="bi bi-calendar-event"></i> Aluguel do Salão
+                    </a>
+                </li>
                 <li class="mb-1">
                     <a th:href="@{/doadores/newdonation}"
                        class="d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none fw-medium text-danger">
@@ -293,6 +440,14 @@
                        th:classappend="${ativa == 'pacientes'} ? ' text-primary bg-primary bg-opacity-10' : ' text-secondary'">
                         <i class="bi bi-people" style="width:20px;text-align:center;"></i>
                         <span>Pacientes</span>
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${hierarquia == 1 or hierarquia == 2}">
+                    <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded"
+                       th:classappend="${ativa == 'aluguelSalao'} ? ' active' : ''"
+                       th:href="@{/aluguel-salao/gestao}">
+                        <i class="bi bi-calendar2-event"></i>
+                        <span>Aluguel do Salão</span>
                     </a>
                 </li>
                 <li class="mb-1" th:if="${hierarquia == 1}">
