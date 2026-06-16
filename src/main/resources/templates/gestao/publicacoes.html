@@ -36,7 +36,7 @@
                          th:attr="data-tipo=${pub.tipoConteudo.name()}">
 
                         <!-- Com imagem principal -->
-                        <div th:if="${pub.imagens != null and !pub.imagens.empty}" class="row g-0">
+                        <div th:if="${pub.imagens != null and !pub.imagens.empty}git" class="row g-0">
                             <div class="col-4 col-md-3">
                                 <img th:src="@{'/' + ${pub.imagens[0].caminhoArquivo}}"
                                      class="img-fluid rounded-start h-100"

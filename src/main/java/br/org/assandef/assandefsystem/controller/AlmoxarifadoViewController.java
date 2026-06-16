@@ -79,7 +79,7 @@ public class AlmoxarifadoViewController {
         return "redirect:/almoxarifado";
     }
 
-    @GetMapping("/categoria/deletar/{id}")
+    @PostMapping("/categoria/deletar/{id}")
     public String deletarCategoria(@PathVariable("id") Integer idCategoria, RedirectAttributes ra) {
         try {
             categoriaService.deleteById(idCategoria); // ajuste se for deletar(...)
@@ -113,7 +113,7 @@ public class AlmoxarifadoViewController {
         return "redirect:/almoxarifado";
     }
 
-    @GetMapping("/material/deletar/{id}")
+    @PostMapping("/material/deletar/{id}")
     public String deletarMaterial(@PathVariable("id") Integer idMaterial, RedirectAttributes ra) {
         try {
             materialService.deleteById(idMaterial);
@@ -167,7 +167,7 @@ public class AlmoxarifadoViewController {
     }
 
     // Aprovar = mudar status para APROVADA e salvar
-    @GetMapping("/solicitacao/aprovar/{id}")
+    @PostMapping("/solicitacao/aprovar/{id}")
     public String aprovarSolicitacao(@PathVariable("id") Integer idSolicitacao, RedirectAttributes ra) {
         try {
             SolicitacoesMaterial sol = solicitacoesService.findById(idSolicitacao);
@@ -183,7 +183,7 @@ public class AlmoxarifadoViewController {
     }
 
     // Recusar = mudar status para RECUSADA e salvar
-    @GetMapping("/solicitacao/recusar/{id}")
+    @PostMapping("/solicitacao/recusar/{id}")
     public String recusarSolicitacao(@PathVariable("id") Integer idSolicitacao, RedirectAttributes ra) {
         try {
             SolicitacoesMaterial sol = solicitacoesService.findById(idSolicitacao);
@@ -196,7 +196,7 @@ public class AlmoxarifadoViewController {
         return "redirect:/almoxarifado";
     }
 
-    @GetMapping("/solicitacao/deletar/{id}")
+    @PostMapping("/solicitacao/deletar/{id}")
     public String deletarSolicitacao(@PathVariable("id") Integer idSolicitacao, RedirectAttributes ra) {
         try {
             solicitacoesService.deleteById(idSolicitacao);

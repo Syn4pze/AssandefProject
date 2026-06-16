@@ -1,5 +1,7 @@
 package br.org.assandef.assandefsystem.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,6 +19,8 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
+    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+
     @Value("${app.upload.dir:uploads/boletos}")
     private String uploadDir;
 
@@ -29,52 +33,40 @@ public class FileStorageService {
      * @return Caminho relativo: "doador_1/2025-01/boleto_123.pdf"
      */
     public String salvarBoleto(MultipartFile file, Integer idDoador, Integer idBoleto) throws IOException {
-        System.out.println("📁 FileStorageService.salvarBoleto() chamado!");
-        System.out.println("   - idDoador: " + idDoador);
-        System.out.println("   - idBoleto: " + idBoleto);
+        logger.info("Iniciando armazenamento de boleto para doador={} boleto={}", idDoador, idBoleto);
 
-        // Validações
         if (file.isEmpty()) {
             throw new IOException("Arquivo vazio");
         }
 
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
-        System.out.println("   - Nome original: " + originalFilename);
+        String contentType = file.getContentType();
 
-        // Validar extensão
         if (!originalFilename.toLowerCase().endsWith(".pdf")) {
             throw new IOException("Apenas arquivos PDF são permitidos");
         }
 
-        // Validar tamanho (10MB)
+        if (!"application/pdf".equalsIgnoreCase(contentType)) {
+            throw new IOException("Tipo de arquivo inválido. Envie um PDF válido");
+        }
+
         if (file.getSize() > 10 * 1024 * 1024) {
             throw new IOException("Arquivo muito grande. Máximo: 10MB");
         }
 
-        // Criar estrutura de pastas: uploads/boletos/doador_{id}/{ano-mes}/
         String anoMes = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
         String subDiretorio = "doador_" + idDoador + "/" + anoMes;
         Path diretorioDestino = Paths.get(uploadDir, subDiretorio);
 
-        System.out.println("   - Diretório destino: " + diretorioDestino.toAbsolutePath());
-
-        // AQUI: Cria automaticamente as pastas se não existirem!
         Files.createDirectories(diretorioDestino);
-        System.out.println("   ✅ Diretório criado/verificado");
 
-        // Nome do arquivo: boleto_{id}_{uuid}.pdf (para evitar duplicatas)
         String nomeArquivo = "boleto_" + idBoleto + "_" + UUID.randomUUID().toString().substring(0, 8) + ".pdf";
         Path arquivoDestino = diretorioDestino.resolve(nomeArquivo);
 
-        System.out.println("   - Arquivo destino: " + arquivoDestino.toAbsolutePath());
-
-        // Copiar arquivo para o destino
         Files.copy(file.getInputStream(), arquivoDestino, StandardCopyOption.REPLACE_EXISTING);
-        System.out.println("   ✅ Arquivo copiado com sucesso!");
 
-        // Retornar caminho relativo (para salvar no banco)
         String caminhoRelativo = subDiretorio + "/" + nomeArquivo;
-        System.out.println("   - Caminho relativo: " + caminhoRelativo);
+        logger.info("Boleto armazenado com sucesso em {}", caminhoRelativo);
 
         return caminhoRelativo;
     }
@@ -93,7 +85,7 @@ public class FileStorageService {
 
         if (Files.exists(arquivo)) {
             Files.delete(arquivo);
-            System.out.println("✅ Arquivo deletado: " + arquivo);
+            logger.info("Arquivo de boleto removido: {}", arquivo);
         }
     }
 

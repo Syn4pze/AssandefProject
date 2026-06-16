@@ -4,6 +4,9 @@ import br.org.assandef.assandefsystem.model.*;
 import br.org.assandef.assandefsystem.repository.FuncionarioRepository;
 import br.org.assandef.assandefsystem.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,15 +31,21 @@ public class AtendimentoController {
     private final PrescricaoService prescricaoService;
 
     @GetMapping
-    public String paginaAtendimento(Model model,
-                                    @ModelAttribute("msg") String msg,
-                                    @ModelAttribute("erro") String erro) {
+    public String paginaAtendimento(
+            @RequestParam(name = "pageAtendimentos", defaultValue = "0") int pageAtendimentos,
+            @RequestParam(name = "sizeAtendimentos", defaultValue = "10") int sizeAtendimentos,
+            Model model,
+            @ModelAttribute("msg") String msg,
+            @ModelAttribute("erro") String erro) {
 
-        List<Atendimento> atendimentos = atendimentoService.findAll();
+        Page<Atendimento> atendimentosPage = atendimentoService.findAll(
+                PageRequest.of(pageAtendimentos, sizeAtendimentos, Sort.by(Sort.Direction.DESC, "idAtendimento"))
+        );
         List<Paciente> pacientes = pacienteService.findAll();
         List<Funcionario> funcionarios = funcionarioService.findAll();
 
-        model.addAttribute("atendimentos", atendimentos);
+        model.addAttribute("atendimentos", atendimentosPage.getContent());
+        model.addAttribute("atendimentosPage", atendimentosPage);
         model.addAttribute("pacientes", pacientes);
         model.addAttribute("funcionarios", funcionarios);
         model.addAttribute("atendimento", new Atendimento());
@@ -60,14 +69,9 @@ public class AtendimentoController {
 
             Paciente paciente = pacienteService.findById(idPaciente);
 
-            // Verifica se já existe atendimento em andamento para este paciente
-            List<Atendimento> atendimentosEmAndamento = atendimentoService.findAll().stream()
-                    .filter(a -> a.getPaciente() != null &&
-                                 a.getPaciente().getIdPaciente().equals(idPaciente) &&
-                                 "EM_ANDAMENTO".equals(a.getStatus()))
-                    .toList();
+            boolean temAtendimentoEmAndamento = atendimentoService.existsEmAndamentoByPaciente(idPaciente);
 
-            if (!atendimentosEmAndamento.isEmpty()) {
+            if (temAtendimentoEmAndamento) {
                 ra.addFlashAttribute("erro", "Este paciente já possui um atendimento em andamento. Finalize o atendimento anterior antes de iniciar um novo.");
                 return "redirect:/atendimento";
             }
@@ -155,7 +159,7 @@ public class AtendimentoController {
         return "redirect:/atendimento";
     }
 
-    @GetMapping("/{id}/deletar")
+    @PostMapping("/{id}/deletar")
     public String deletarAtendimento(
             @PathVariable Integer id,
             RedirectAttributes ra) {

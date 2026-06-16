@@ -12,4 +12,5 @@ public interface AtendimentoRepository extends JpaRepository<Atendimento, Intege
     List<Atendimento> findByFuncionario_IdFuncionario(Integer idFuncionario);
     List<Atendimento> findByStatus(String status);
     List<Atendimento> findByDataHoraInicioBetween(LocalDateTime inicio, LocalDateTime fim);
+    boolean existsByPaciente_IdPacienteAndStatus(Integer idPaciente, String status);
 }

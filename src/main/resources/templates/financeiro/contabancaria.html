@@ -481,6 +481,9 @@
 <script th:inline="javascript" defer>
     /*<![CDATA[*/
 
+    const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
+    const CSRF_PARAM = /*[[${_csrf.parameterName}]]*/ '';
+
     // ===================== DELEGAÇÃO CENTRALIZADA =====================
     document.addEventListener('click', function (e) {
       const btn = e.target.closest('button[data-action]');
@@ -592,9 +595,24 @@
     }
 
     // ===================== EXCLUSÃO =====================
+    function enviarPostComCsrf(url) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = CSRF_PARAM;
+      csrfInput.value = CSRF_TOKEN;
+      form.appendChild(csrfInput);
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
     function confirmarExclusao(urlBase, id) {
       if (confirm('Tem certeza que deseja excluir este registro?')) {
-        window.location.href = urlBase + id;
+        enviarPostComCsrf(urlBase + id);
       }
     }
 

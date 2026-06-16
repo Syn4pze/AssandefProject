@@ -238,11 +238,12 @@
                                             onclick="editarDisponibilidade(this)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <a class="btn btn-sm btn-outline-danger" title="Excluir"
-                                       th:href="@{/aluguel-salao/gestao/disponibilidades/excluir/{id}(id=${disp.idDisponibilidade})}"
-                                       onclick="return confirm('Deseja realmente excluir esta disponibilidade?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                    <form th:action="@{/aluguel-salao/gestao/disponibilidades/excluir/{id}(id=${disp.idDisponibilidade})}" method="post" class="d-inline" onsubmit="return confirm('Deseja realmente excluir esta disponibilidade?');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             <tr th:if="${disponibilidades == null or #lists.isEmpty(disponibilidades)}">

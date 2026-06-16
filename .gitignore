@@ -35,3 +35,12 @@ build/
 ### VS Code ###
 .vscode/
 
+uploads/
+images/
+**/images/
+.abacusai/
+.env
+.env.*
+!.env.example
+*.log
+

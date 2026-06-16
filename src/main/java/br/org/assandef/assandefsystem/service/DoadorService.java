@@ -3,6 +3,8 @@ package br.org.assandef.assandefsystem.service;
 import br.org.assandef.assandefsystem.model.Doador;
 import br.org.assandef.assandefsystem.repository.DoadorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -33,6 +35,10 @@ public class DoadorService {
     // ========= Consultas básicas =========
     public List<Doador> findAll() {
         return doadorRepository.findAll();
+    }
+
+    public Page<Doador> findAll(Pageable pageable) {
+        return doadorRepository.findAll(pageable);
     }
 
     public Doador findById(Integer id) {
