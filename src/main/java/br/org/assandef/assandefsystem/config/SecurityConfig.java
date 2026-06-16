@@ -36,7 +36,15 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**")
+                        .ignoringRequestMatchers(
+                                "/api/**",
+                                "/doadores/newdonation",
+                                "/doadores/newdonation/",
+                                "/doadores/salvar",
+                                "/doadores/salvar/",
+                                "/aluguel-salao/solicitar",
+                                "/aluguel-salao/solicitar/"
+                        )
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -51,8 +59,42 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()
-                        .requestMatchers("/", "/login", "/esqueci-senha", "/reset-password", "/doadores/newdonation", "/sobre","/publicacoes","/publicacoes/**","/images/**","/uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/doadores/salvar", "/password/forgot", "/password/reset").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/esqueci-senha",
+                                "/reset-password",
+                                "/doadores/newdonation",
+                                "/doadores/newdonation/",
+                                "/sobre",
+                                "/publicacoes",
+                                "/publicacoes/**",
+                                "/aluguel-salao",
+                                "/aluguel-salao/",
+                                "/images/**",
+                                "/uploads/**",
+                                "/error",
+                                "/error/**"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/doadores/salvar",
+                                "/doadores/salvar/",
+                                "/password/forgot",
+                                "/password/reset",
+                                "/aluguel-salao/solicitar",
+                                "/aluguel-salao/solicitar/"
+                        ).permitAll()
+
+                        // /aluguel-salao/gestao/** -> hierarquia 1 ou 2
+                        .requestMatchers("/aluguel-salao/gestao", "/aluguel-salao/gestao/**")
+                        .access((authSupplier, ctx) -> {
+                            var authentication = authSupplier.get();
+                            AuthService authService = applicationContext.getBean(AuthService.class);
+                            boolean allowed = authService.hasAnyHierarquia(authentication, 1, 2);
+                            return new AuthorizationDecision(allowed);
+                        })
 
                         // /funcionarios/** -> somente hierarquia 1
                         .requestMatchers("/funcionarios/**")
