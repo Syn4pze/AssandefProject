@@ -30,32 +30,23 @@ public class PublicacaoController {
     private final UploadService uploadService;
     private final FuncionarioRepository funcionarioRepository;
 
-    // ── VIEWS ─────────────────────────────────────────────────
-
-    // Listagem interna (somente Admin)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model) {
-        model.addAttribute("publicacoes", publicacaoService.listarTodas());
-        model.addAttribute("ativa", "publicacoes-gestao");
-        return "gestao/publicacoes"; // ← era "gestao/publicacoes-lista"
-    }
-
-    // Formulário de edição
-    @GetMapping("/editar/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String editar(@PathVariable Integer id, Model model) {
-        model.addAttribute("publicacao", publicacaoService.buscarPorId(id));
-        model.addAttribute("tipos", Publicacao.TipoConteudo.values());
-        model.addAttribute("imagens", publicacaoService.listarImagensDaPublicacao(id));
-        model.addAttribute("videos", publicacaoService.listarVideosDaPublicacao(id));
-        model.addAttribute("ativa", "publicacoes-gestao");
+        popularModelPublicacoes(model);
         return "gestao/publicacoes";
     }
 
-    // ── AÇÕES ─────────────────────────────────────────────────
+    @GetMapping("/editar/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String editar(@PathVariable Integer id, Model model) {
+        popularModelPublicacoes(model);
+        model.addAttribute("publicacao", publicacaoService.buscarPorId(id));
+        model.addAttribute("imagens", publicacaoService.listarImagensDaPublicacao(id));
+        model.addAttribute("videos", publicacaoService.listarVideosDaPublicacao(id));
+        return "gestao/publicacoes";
+    }
 
-    // Salvar (criação e edição)
     @PostMapping("/salvar")
     @PreAuthorize("hasRole('ADMIN')")
     public String salvar(Publicacao publicacao,
@@ -127,13 +118,11 @@ public class PublicacaoController {
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("erro", "Erro ao salvar: " + e.getMessage());
-            return "redirect:/gestao/publicacoes";
         }
 
         return "redirect:/gestao/publicacoes";
     }
 
-    // Publicar (muda status para PUBLICADA)
     @PostMapping("/publicar/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String publicar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
@@ -146,37 +135,13 @@ public class PublicacaoController {
         return "redirect:/gestao/publicacoes";
     }
 
-    @GetMapping("/publicacoes/{id}/json")
+    @GetMapping({"/{id}/json", "/publicacoes/{id}/json"})
     @ResponseBody
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> publicacaoJson(@PathVariable Integer id) {
-        Publicacao pub = publicacaoService.buscarPorId(id);
-        Map<String, Object> map = new java.util.LinkedHashMap<>();
-        map.put("id",       pub.getIdPublicacao());
-        map.put("titulo",   pub.getTitulo());
-        map.put("descricao",pub.getDescricao());
-        map.put("conteudo", pub.getConteudo());
-        map.put("tipo",     pub.getTipoConteudo().name());
-        map.put("data",     pub.getDataCriacao() != null
-                ? pub.getDataCriacao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH'h'mm"))
-                : "");
-        map.put("imagens",  pub.getImagens() == null ? List.of() :
-                pub.getImagens().stream()
-                        .map(PublicacaoImagem::getCaminhoArquivo)
-                        .toList());
-        map.put("videos", pub.getVideos() == null ? List.of() :
-                pub.getVideos().stream()
-                        .map(PublicacaoVideo::getUrlYoutube)
-                        .toList());
-        map.put("localEvento", pub.getLocalEvento());
-        map.put("dataEvento",  pub.getDataEvento() != null
-                ? pub.getDataEvento().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH'h'mm"))
-                : null);
-        map.put("dataEventoIso", pub.getDataEvento() != null
-                ? pub.getDataEvento().toString()
-                : null);
-        return map;
+        return publicacaoService.montarDadosJson(id);
     }
-    // Excluir imagem individual
+
     @PostMapping("/imagem/excluir/{idImagem}")
     @PreAuthorize("hasRole('ADMIN')")
     public String excluirImagem(@PathVariable Integer idImagem,
@@ -198,7 +163,6 @@ public class PublicacaoController {
         return "redirect:/gestao/publicacoes/editar/" + idPublicacao;
     }
 
-    // Excluir vídeo individual
     @PostMapping("/video/excluir/{idVideo}")
     @PreAuthorize("hasRole('ADMIN')")
     public String excluirVideo(@PathVariable Integer idVideo,
@@ -213,17 +177,16 @@ public class PublicacaoController {
         return "redirect:/gestao/publicacoes/editar/" + idPublicacao;
     }
 
-    // Excluir publicação completa
     @PostMapping("/excluir/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String excluir(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
-            // Remove arquivos físicos das imagens antes de excluir
             publicacaoService.listarImagensDaPublicacao(id)
                     .forEach(img -> {
                         try {
                             uploadService.excluirArquivo(img.getCaminhoArquivo());
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                     });
 
             publicacaoService.excluir(id);
@@ -232,5 +195,12 @@ public class PublicacaoController {
             redirectAttributes.addFlashAttribute("erro", "Erro ao excluir: " + e.getMessage());
         }
         return "redirect:/gestao/publicacoes";
+    }
+
+    private void popularModelPublicacoes(Model model) {
+        model.addAttribute("publicacoes", publicacaoService.listarTodas());
+        model.addAttribute("publicacao", new Publicacao());
+        model.addAttribute("tipos", Publicacao.TipoConteudo.values());
+        model.addAttribute("ativa", "publicacoes-gestao");
     }
 }

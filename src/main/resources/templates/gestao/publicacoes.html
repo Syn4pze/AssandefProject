@@ -36,7 +36,7 @@
                          th:attr="data-tipo=${pub.tipoConteudo.name()}">
 
                         <!-- Com imagem principal -->
-                        <div th:if="${pub.imagens != null and !pub.imagens.empty}git" class="row g-0">
+                        <div th:if="${pub.imagens != null and !pub.imagens.empty}" class="row g-0">
                             <div class="col-4 col-md-3">
                                 <img th:src="@{'/' + ${pub.imagens[0].caminhoArquivo}}"
                                      class="img-fluid rounded-start h-100"
@@ -303,8 +303,10 @@
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Tipo <span class="text-danger">*</span></label>
                                             <select name="tipoConteudo" class="form-select" id="modalTipoConteudo" required>
-                                                <option value="" disabled>Selecione...</option>
-                                                <option th:each="tipo : ${tipos}" th:value="${tipo}" th:text="${tipo}"></option>
+                                                <option value="" selected disabled>Selecione...</option>
+                                                <option value="NOTICIA">Notícia</option>
+                                                <option value="EVENTO">Evento</option>
+                                                <option value="ARTIGO">Artigo</option>
                                             </select>
                                         </div>
                                     </div>
@@ -326,7 +328,7 @@
                             </div>
 
                             <!-- Bloco 2: Detalhes do Evento (aparece só quando tipo = EVENTO) -->
-                            <div class="card border-0 bg-light mb-4" id="modalCamposEvento" style="display:none!important;">
+                            <div class="card border-0 bg-light mb-4" id="modalCamposEvento" style="display:none;">
                                 <div class="card-header bg-white border-bottom py-3 rounded-top">
                                     <h6 class="mb-0 fw-semibold"><i class="bi bi-calendar-event me-2 text-success"></i>Detalhes do Evento</h6>
                                 </div>
@@ -567,6 +569,22 @@
 
     let modoEdicaoAtivo = false;
 
+    const garantirTiposPublicacao = () => {
+      if (!modalTipoConteudo) {
+        return;
+      }
+      const opcoesValidas = Array.from(modalTipoConteudo.options).filter((opcao) => opcao.value);
+      if (opcoesValidas.length >= 3) {
+        return;
+      }
+      modalTipoConteudo.innerHTML = `
+        <option value="" selected disabled>Selecione...</option>
+        <option value="NOTICIA">Notícia</option>
+        <option value="EVENTO">Evento</option>
+        <option value="ARTIGO">Artigo</option>
+      `;
+    };
+
     modalTipoConteudo?.addEventListener('change', function () {
       modalCamposEvento.style.display = this.value === 'EVENTO' ? 'block' : 'none';
     });
@@ -602,6 +620,7 @@
     };
 
     const limparModalPublicacao = () => {
+      garantirTiposPublicacao();
       formNovaPublicacao?.reset();
       modoEdicaoAtivo = false;
       if (modalIdPublicacao) {
@@ -708,7 +727,10 @@
 
     async function abrirModalEdicaoPublicacao(id) {
       try {
-        const resposta = await fetch('/publicacoes/' + id + '/json');
+        let resposta = await fetch('/gestao/publicacoes/' + id + '/json');
+        if (!resposta.ok) {
+          resposta = await fetch('/publicacoes/' + id + '/json');
+        }
         if (!resposta.ok) {
           throw new Error('Falha ao carregar publicação');
         }
@@ -803,6 +825,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      garantirTiposPublicacao();
       document.getElementById('btnAbrirModalNovaPublicacao')?.addEventListener('click', () => {
         limparModalPublicacao();
       });
@@ -999,8 +1022,12 @@ function normalizarYoutubeEmbed(url) {
 async function abrirModalPublicacao(btn) {
     const id = btn.dataset.id;
 
-    const res = await fetch('/publicacoes/' + id + '/json');
-    const pub = await res.json();
+    try {
+        const res = await fetch('/publicacoes/' + id + '/json');
+        if (!res.ok) {
+            throw new Error('Falha ao carregar publicação');
+        }
+        const pub = await res.json();
 
     // Badge
     const badge = document.getElementById('mpBadge');
@@ -1101,6 +1128,9 @@ async function abrirModalPublicacao(btn) {
     }
 
     new bootstrap.Modal(document.getElementById('modalVerPublicacao')).show();
+    } catch (e) {
+        alert('Não foi possível carregar a publicação.');
+    }
 }
 </script>
 

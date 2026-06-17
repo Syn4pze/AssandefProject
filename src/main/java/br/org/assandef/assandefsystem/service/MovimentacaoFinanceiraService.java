@@ -25,6 +25,17 @@ public class MovimentacaoFinanceiraService {
         return movimentacaoFinanceiraRepository.findAll();
     }
 
+    public List<MovimentacaoFinanceira> findAllOrdenadasParaRelatorio() {
+        return movimentacaoFinanceiraRepository.findAllByOrderByDataMovimentacaoDescIdMovimentacaoDesc();
+    }
+
+    public List<MovimentacaoFinanceira> findByContasParaRelatorio(List<Integer> idsContas) {
+        if (idsContas == null || idsContas.isEmpty()) {
+            return findAllOrdenadasParaRelatorio();
+        }
+        return movimentacaoFinanceiraRepository.findByConta_IdContaInOrderByDataMovimentacaoDescIdMovimentacaoDesc(idsContas);
+    }
+
     public MovimentacaoFinanceira findById(Integer id) {
         return movimentacaoFinanceiraRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movimentação não encontrada com ID: " + id));
