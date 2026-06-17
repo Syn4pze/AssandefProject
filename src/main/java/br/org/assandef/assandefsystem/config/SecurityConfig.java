@@ -87,6 +87,15 @@ public class SecurityConfig {
                                 "/aluguel-salao/solicitar/"
                         ).permitAll()
 
+                        // /gestao/publicacoes/** -> somente hierarquia 1 (Diretoria/Admin)
+                        .requestMatchers("/gestao/publicacoes", "/gestao/publicacoes/**")
+                        .access((authSupplier, ctx) -> {
+                            var authentication = authSupplier.get();
+                            AuthService authService = applicationContext.getBean(AuthService.class);
+                            boolean allowed = authService.hasHierarquia(authentication, 1);
+                            return new AuthorizationDecision(allowed);
+                        })
+
                         // /aluguel-salao/gestao/** -> hierarquia 1 ou 2
                         .requestMatchers("/aluguel-salao/gestao", "/aluguel-salao/gestao/**")
                         .access((authSupplier, ctx) -> {

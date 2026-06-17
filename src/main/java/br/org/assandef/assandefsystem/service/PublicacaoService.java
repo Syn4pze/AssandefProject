@@ -12,9 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,11 @@ public class PublicacaoService {
                 .orElseThrow(() -> new RuntimeException("Publicação não encontrada: " + id));
     }
 
+    public Publicacao buscarPublicadaPorId(Integer id) {
+        return publicacaoRepository.findByIdPublicacaoAndDataPublicacaoIsNotNull(id)
+                .orElseThrow(() -> new RuntimeException("Publicação não encontrada ou ainda não publicada: " + id));
+    }
+
     @Transactional
     public Publicacao salvar(Publicacao publicacao) {
         if (publicacao.getDataCriacao() == null) {
@@ -55,23 +63,42 @@ public class PublicacaoService {
         Publicacao pub = buscarPorId(id);
         pub.setDataPublicacao(LocalDateTime.now());
         pub.setDataAtualizacao(LocalDateTime.now());
-        return publicacaoRepository.save(pub);
+        return publicacaoRepository.saveAndFlush(pub);
     }
 
     @Transactional
     public Publicacao arquivar(Integer id) {
         Publicacao pub = buscarPorId(id);
+        pub.setDataPublicacao(null);
+        pub.setDataAtualizacao(LocalDateTime.now());
         return publicacaoRepository.save(pub);
     }
 
     @Transactional
     public void excluir(Integer id) {
-        buscarPorId(id); // valida existência
+        buscarPorId(id);
         publicacaoRepository.deleteById(id);
     }
 
     public List<PublicacaoImagem> listarImagensDaPublicacao(Integer idPublicacao) {
         return imagemRepository.findByPublicacaoIdPublicacaoOrderByOrdemExibicao(idPublicacao);
+    }
+
+    public Map<Integer, List<String>> mapearImagensPorPublicacao(List<Publicacao> publicacoes) {
+        if (publicacoes == null || publicacoes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return publicacoes.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        Publicacao::getIdPublicacao,
+                        publicacao -> listarImagensDaPublicacao(publicacao.getIdPublicacao()).stream()
+                                .map(PublicacaoImagem::getCaminhoArquivo)
+                                .toList(),
+                        (listaAtual, listaNova) -> listaAtual,
+                        LinkedHashMap::new
+                ));
     }
 
     @Transactional
@@ -121,7 +148,16 @@ public class PublicacaoService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> montarDadosJson(Integer id) {
-        Publicacao pub = buscarPorId(id);
+        return montarDadosJson(buscarPorId(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> montarDadosPublicoJson(Integer id) {
+        return montarDadosJson(buscarPublicadaPorId(id));
+    }
+
+    private Map<String, Object> montarDadosJson(Publicacao pub) {
+        Integer id = pub.getIdPublicacao();
         List<String> imagens = listarImagensDaPublicacao(id).stream()
                 .map(PublicacaoImagem::getCaminhoArquivo)
                 .toList();

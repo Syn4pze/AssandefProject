@@ -31,14 +31,34 @@
                     <button type="button" class="btn btn-outline-primary btn-sm" data-tipo-filtro="ARTIGO">Artigos</button>
                 </div>
 
+                <div th:if="${hierarquia != null and hierarquia == 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                    <div>
+                        <span th:if="${modoGestao}" class="badge bg-dark-subtle text-dark border">Modo gestão</span>
+                        <span th:unless="${modoGestao}" class="badge bg-light text-dark border">Visualização pública</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:unless="${modoGestao}" th:href="@{/gestao/publicacoes}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-gear me-1"></i>Gerenciar publicações
+                        </a>
+                        <a th:if="${modoGestao}" th:href="@{/publicacoes}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-eye me-1"></i>Ver página pública
+                        </a>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovaPublicacao" onclick="limparModalPublicacao()">
+                            <i class="bi bi-plus-lg me-1"></i>Nova publicação
+                        </button>
+                    </div>
+                </div>
+
                 <div class="d-flex flex-column gap-3" id="listaPublicacoes">
-                    <div th:each="pub : ${publicacoes}" class="card border-0 shadow-sm publicacao-card"
+                    <div th:each="pub : ${publicacoes}"
+                         th:with="imgs=${imagensPorPublicacao != null ? imagensPorPublicacao.get(pub.idPublicacao) : null}"
+                         class="card border-0 shadow-sm publicacao-card"
                          th:attr="data-tipo=${pub.tipoConteudo.name()}">
 
                         <!-- Com imagem principal -->
-                        <div th:if="${pub.imagens != null and !pub.imagens.empty}" class="row g-0">
+                        <div th:if="${imgs != null and !imgs.empty}" class="row g-0">
                             <div class="col-4 col-md-3">
-                                <img th:src="@{'/' + ${pub.imagens[0].caminhoArquivo}}"
+                                <img th:src="@{'/' + ${imgs[0]}}"
                                      class="img-fluid rounded-start h-100"
                                      style="object-fit:cover;min-height:130px;"
                                      th:alt="${pub.titulo}">
@@ -51,6 +71,8 @@
                                               th:style="${pub.tipoConteudo.name() == 'ARTIGO'} ? 'background-color:#6f42c1;font-size:.7rem' : 'font-size:.7rem'"
                                               th:text="${pub.tipoConteudo.name() == 'NOTICIA'} ? 'Notícia' : (${pub.tipoConteudo.name() == 'EVENTO'} ? 'Evento' : 'Artigo')">
                                         </span>
+                                        <span th:if="${hierarquia != null and hierarquia == 1 and pub.dataPublicacao == null}" class="badge bg-warning text-dark" style="font-size:.65rem">Rascunho</span>
+                                        <span th:if="${hierarquia != null and hierarquia == 1 and pub.dataPublicacao != null}" class="badge bg-success-subtle text-success border" style="font-size:.65rem">Publicado</span>
                                         <small class="text-muted">
                                             <i class="bi bi-calendar3 me-1"></i>
                                             <span th:text="${#temporals.format(pub.dataCriacao, 'HH') + 'h' + #temporals.format(pub.dataCriacao, 'mm')}"></span>
@@ -71,7 +93,7 @@
                                             Ver mais →
                                         </button>
 
-                                        <div th:if="${hierarquia == 1}" class="dropdown">
+                                        <div th:if="${hierarquia != null and hierarquia == 1}" class="dropdown">
                                             <button type="button" class="btn btn-sm btn-outline-secondary border-0"
                                                     data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="bi bi-three-dots-vertical"></i>
@@ -83,6 +105,24 @@
                                                         <i class="bi bi-pencil me-2 text-primary"></i>Editar
                                                     </button>
                                                 </li>
+                                                <li th:if="${pub.dataPublicacao == null}">
+                                                    <form th:action="@{/gestao/publicacoes/publicar/{id}(id=${pub.idPublicacao})}" method="post">
+                                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                        <button type="submit" class="dropdown-item text-success">
+                                                            <i class="bi bi-send-check me-2"></i>Publicar
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li th:if="${pub.dataPublicacao != null}">
+                                                    <form th:action="@{/gestao/publicacoes/arquivar/{id}(id=${pub.idPublicacao})}" method="post"
+                                                          onsubmit="return confirm('Ocultar esta publicação da página pública?')">
+                                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                        <button type="submit" class="dropdown-item text-warning">
+                                                            <i class="bi bi-eye-slash me-2"></i>Ocultar do público
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
                                                 <li>
                                                     <form th:action="@{/gestao/publicacoes/excluir/{id}(id=${pub.idPublicacao})}" method="post"
                                                           onsubmit="return confirm('Remover esta publicação?')">
@@ -100,7 +140,7 @@
                         </div>
 
                         <!-- Sem imagem -->
-                        <div th:if="${pub.imagens == null or pub.imagens.empty}" class="card-body py-3 px-3">
+                        <div th:if="${imgs == null or imgs.empty}" class="card-body py-3 px-3">
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <span th:classappend="${pub.tipoConteudo.name() == 'NOTICIA'} ? 'bg-primary' : (${pub.tipoConteudo.name() == 'EVENTO'} ? 'bg-success' : '')"
                                       class="badge"
@@ -132,7 +172,7 @@
                                     Ver mais →
                                 </button>
 
-                                <div th:if="${hierarquia == 1}" class="dropdown">
+                                <div th:if="${hierarquia != null and hierarquia == 1}" class="dropdown">
                                     <button type="button" class="btn btn-sm btn-outline-secondary border-0"
                                             data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="bi bi-three-dots-vertical"></i>
@@ -144,6 +184,24 @@
                                                 <i class="bi bi-pencil me-2 text-primary"></i>Editar
                                             </button>
                                         </li>
+                                        <li th:if="${pub.dataPublicacao == null}">
+                                            <form th:action="@{/gestao/publicacoes/publicar/{id}(id=${pub.idPublicacao})}" method="post">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                <button type="submit" class="dropdown-item text-success">
+                                                    <i class="bi bi-send-check me-2"></i>Publicar
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li th:if="${pub.dataPublicacao != null}">
+                                            <form th:action="@{/gestao/publicacoes/arquivar/{id}(id=${pub.idPublicacao})}" method="post"
+                                                  onsubmit="return confirm('Ocultar esta publicação da página pública?')">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                <button type="submit" class="dropdown-item text-warning">
+                                                    <i class="bi bi-eye-slash me-2"></i>Ocultar do público
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form th:action="@{/gestao/publicacoes/excluir/{id}(id=${pub.idPublicacao})}" method="post"
                                                   onsubmit="return confirm('Remover esta publicação?')">
@@ -228,7 +286,7 @@
 
     <!-- Botão flutuante — somente Admin -->
     <sec:authorize access="isAuthenticated()">
-        <div th:if="${hierarquia == 1}">
+        <div th:if="${hierarquia != null and hierarquia == 1}">
             <button type="button"
                     id="btnAbrirModalNovaPublicacao"
                     class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
@@ -246,7 +304,7 @@
      MODAL — Nova Publicação (somente Admin)
 ══════════════════════════════════════════════ -->
 <sec:authorize access="isAuthenticated()">
-    <div th:if="${hierarquia == 1}">
+    <div th:if="${hierarquia != null and hierarquia == 1}">
         <div class="modal fade" id="modalNovaPublicacao" tabindex="-1"
              aria-labelledby="modalNovaPublicacaoLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -442,7 +500,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <!-- Botão ⋯ Admin -->
-                            <div th:if="${hierarquia == 1}" class="dropdown">
+                            <div th:if="${hierarquia != null and hierarquia == 1}" class="dropdown">
                                 <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-circle"
                                         style="width:32px;height:32px;"
                                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -524,7 +582,13 @@
     }
 </style>
 
-<script>
+<script th:inline="javascript">
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
     const modalNovaPublicacaoEl = document.getElementById('modalNovaPublicacao');
     const formNovaPublicacao = document.getElementById('formNovaPublicacao');
     const modalTitulo = document.getElementById('modalNovaPublicacaoLabel');
@@ -773,7 +837,7 @@
           modalBotaoSalvar.innerHTML = '<i class="bi bi-floppy me-1"></i>Salvar Alterações';
         }
 
-        bootstrap.Modal.getOrCreateInstance(modalNovaPublicacaoEl).show();
+        if (modalNovaPublicacaoEl) { bootstrap.Modal.getOrCreateInstance(modalNovaPublicacaoEl).show(); }
       } catch (e) {
         alert('Não foi possível carregar a publicação para edição.');
       }
@@ -831,7 +895,7 @@
       });
       limparModalPublicacao();
       const temAlerta = document.querySelector('.alert-danger, .alert-success');
-      if (temAlerta) {
+      if (temAlerta && modalNovaPublicacaoEl) {
         const modal = new bootstrap.Modal(modalNovaPublicacaoEl);
         modal?.show();
       }
@@ -992,6 +1056,8 @@
 
     // Dados das imagens por publicação (populados pelo Thymeleaf)
 const imagensPorPublicacao = /*[[${imagensPorPublicacaoJson}]]*/ {};
+const MODO_GESTAO_PUBLICACOES = /*[[${modoGestao}]]*/ false;
+const USUARIO_ADMIN_PUBLICACOES = /*[[${hierarquia != null and hierarquia == 1}]]*/ false;
 
 function normalizarYoutubeEmbed(url) {
     if (!url) {
@@ -1023,7 +1089,8 @@ async function abrirModalPublicacao(btn) {
     const id = btn.dataset.id;
 
     try {
-        const res = await fetch('/publicacoes/' + id + '/json');
+        const endpointDetalhe = (MODO_GESTAO_PUBLICACOES || USUARIO_ADMIN_PUBLICACOES) ? '/gestao/publicacoes/' + id + '/json' : '/publicacoes/' + id + '/json';
+        const res = await fetch(endpointDetalhe);
         if (!res.ok) {
             throw new Error('Falha ao carregar publicação');
         }
