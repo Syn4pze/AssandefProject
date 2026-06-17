@@ -6,13 +6,6 @@
 <header th:replace="~{fragments/base :: cabecalho}"></header>
 
 <main class="salao-page">
-<style>
-    .salao-disponibilidade-card-selecionado {
-        outline: 3px solid rgba(13, 110, 253, 0.35);
-        background: rgba(13, 110, 253, 0.06);
-    }
-</style>
-
 
     <!-- HERO -->
     <section class="salao-hero">
@@ -25,17 +18,17 @@
                         Realize seu evento e contribua com as ações sociais da ASSANDEF.
                     </p>
                     <p class="salao-hero-text">
-                        A ASSANDEF disponibiliza seu salão para locação em datas e horários cadastrados pela equipe administrativa.
-                        Consulte as opções disponíveis, selecione o melhor horário e envie sua solicitação. A equipe entrará em contato
-                        para combinar os detalhes e o pagamento.
+                        Informe seus dados, escolha a data e o horário pretendidos para o aluguel do salão e envie sua solicitação.
+                        A equipe da ASSANDEF verificará a disponibilidade e entrará em contato pelo telefone ou e-mail informado
+                        para combinar os detalhes e a confirmação do pagamento.
                     </p>
 
                     <div class="sobre-hero-actions">
-                        <a href="#disponibilidades" class="btn btn-primary btn-lg">
-                            <i class="bi bi-calendar-check me-2"></i>Ver datas disponíveis
+                        <a href="#solicitar" class="btn btn-primary btn-lg">
+                            <i class="bi bi-calendar-check me-2"></i>Solicitar locação
                         </a>
-                        <a href="#solicitar" class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-file-earmark-text me-2"></i>Solicitar locação
+                        <a href="#informacoes" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-info-circle me-2"></i>Como funciona
                         </a>
                     </div>
                 </div>
@@ -49,15 +42,15 @@
                         <div class="salao-info-list">
                             <div class="salao-info-item">
                                 <i class="bi bi-calendar2-week"></i>
-                                <span>Escolha uma data e horário disponível.</span>
+                                <span>Você informa a data e o horário pretendidos.</span>
                             </div>
                             <div class="salao-info-item">
-                                <i class="bi bi-cash-coin"></i>
-                                <span>O valor é exibido após a seleção.</span>
+                                <i class="bi bi-send-check"></i>
+                                <span>A solicitação é enviada para análise da Secretaria.</span>
                             </div>
                             <div class="salao-info-item">
                                 <i class="bi bi-telephone-outbound"></i>
-                                <span>A Secretaria entra em contato para combinar o pagamento.</span>
+                                <span>A equipe entra em contato para confirmar disponibilidade e pagamento.</span>
                             </div>
                         </div>
                     </div>
@@ -71,7 +64,6 @@
         <div class="container">
             <nav class="sobre-atalhos-nav" aria-label="Navegação da página de aluguel do salão">
                 <a href="#informacoes">Informações</a>
-                <a href="#disponibilidades">Datas e horários</a>
                 <a href="#solicitar">Formulário</a>
                 <a href="#contato">Contato</a>
             </nav>
@@ -103,7 +95,7 @@
                 <p>
                     A locação do salão auxilia a ASSANDEF na arrecadação de recursos para manutenção de suas atividades.
                     O pedido enviado pelo site não confirma automaticamente a reserva: ele será analisado pela Secretaria,
-                    que entrará em contato pelo celular ou e-mail informado.
+                    que entrará em contato pelo celular ou e-mail informado caso a data e o horário solicitados estejam disponíveis.
                 </p>
             </div>
 
@@ -111,22 +103,22 @@
                 <div class="col-md-4">
                     <div class="salao-feature-card h-100">
                         <i class="bi bi-calendar-event"></i>
-                        <h3>Datas cadastradas</h3>
-                        <p>As opções exibidas são cadastradas pela equipe administrativa com data, horário e valor definidos.</p>
+                        <h3>Data pretendida</h3>
+                        <p>O solicitante informa diretamente a data e o período em que deseja utilizar o salão.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="salao-feature-card h-100">
                         <i class="bi bi-ui-checks-grid"></i>
                         <h3>Solicitação online</h3>
-                        <p>Preencha seus dados, informe o motivo do aluguel e envie a solicitação para análise da Secretaria.</p>
+                        <p>O formulário reúne os dados do responsável, contato e finalidade do evento para análise da equipe.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="salao-feature-card h-100">
                         <i class="bi bi-person-check"></i>
                         <h3>Confirmação pela equipe</h3>
-                        <p>A reserva é confirmada somente após contato da equipe administrativa e combinação do pagamento.</p>
+                        <p>A reserva é confirmada somente após contato da Secretaria e combinação do pagamento.</p>
                     </div>
                 </div>
             </div>
@@ -164,46 +156,6 @@
         </div>
     </section>
 
-    <!-- DISPONIBILIDADES -->
-    <section id="disponibilidades" class="sobre-section">
-        <div class="container">
-            <div class="section-heading text-center">
-                <span class="section-kicker">Consulta de disponibilidade</span>
-                <h2>Datas e horários disponíveis</h2>
-                <p>
-                    Selecione uma das opções disponíveis. O valor da locação será exibido automaticamente no formulário.
-                </p>
-            </div>
-
-            <div class="alert alert-info border-0 shadow-sm rounded-4" th:if="${disponibilidades == null or #lists.isEmpty(disponibilidades)}">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                No momento não há datas disponíveis cadastradas para locação do salão.
-            </div>
-
-            <div class="row g-4" th:if="${disponibilidades != null and !#lists.isEmpty(disponibilidades)}">
-                <div class="col-md-6 col-xl-4" th:each="disp : ${disponibilidades}">
-                    <button type="button"
-                            class="salao-disponibilidade-card w-100 text-start border-0"
-                            th:id="${'disp-card-' + disp.idDisponibilidade}"
-                            th:attr="data-id=${disp.idDisponibilidade},
-                                     data-valor=${#numbers.formatDecimal(disp.valor, 1, 'POINT', 2, 'COMMA')},
-                                     data-data=${#temporals.format(disp.dataLocacao, 'dd/MM/yyyy')},
-                                     data-horario=${#temporals.format(disp.horaInicio, 'HH:mm') + ' às ' + #temporals.format(disp.horaFim, 'HH:mm')}">
-                        <span class="salao-disponibilidade-date">
-                            <i class="bi bi-calendar3 me-2"></i>
-                            <span th:text="${#temporals.format(disp.dataLocacao, 'dd/MM/yyyy')}">20/06/2026</span>
-                        </span>
-                        <span class="salao-disponibilidade-time">
-                            <i class="bi bi-clock me-2"></i>
-                            <span th:text="${#temporals.format(disp.horaInicio, 'HH:mm') + ' às ' + #temporals.format(disp.horaFim, 'HH:mm')}">14:00 às 18:00</span>
-                        </span>
-                        <span class="salao-disponibilidade-action">Selecionar horário</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- FORMULÁRIO -->
     <section id="solicitar" class="sobre-section sobre-section-soft">
         <div class="container">
@@ -213,14 +165,14 @@
                         <span class="section-kicker">Solicitação</span>
                         <h2>Envie seu pedido de locação</h2>
                         <p>
-                            Preencha as informações do responsável pelo evento. Após o envio, a Secretaria da ASSANDEF poderá
-                            entrar em contato por e-mail ou celular para combinar detalhes e pagamento.
+                            Preencha os dados do responsável e informe a data e o horário desejados. A solicitação será registrada
+                            como pendente e analisada pela equipe da ASSANDEF.
                         </p>
 
-                        <div class="salao-valor-box" id="valorSelecionadoBox">
-                            <span>Valor da opção selecionada</span>
-                            <strong id="valorSelecionadoTexto">Selecione uma data</strong>
-                            <small id="dataSelecionadaTexto">O valor será exibido aqui.</small>
+                        <div class="salao-valor-box" id="periodoSolicitadoBox">
+                            <span>Período pretendido</span>
+                            <strong id="periodoSolicitadoTexto">Informe a data e o horário</strong>
+                            <small id="periodoSolicitadoDetalhe">A Secretaria confirmará a disponibilidade posteriormente.</small>
                         </div>
                     </div>
                 </div>
@@ -228,8 +180,6 @@
                 <div class="col-lg-7">
                     <div class="salao-form-card">
                         <form id="formSolicitacaoSalao" action="/aluguel-salao/solicitar" method="post">
-                            <input type="hidden" id="idDisponibilidade" name="idDisponibilidade" required>
-
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label for="nomeResponsavel" class="form-label">Nome do responsável</label>
@@ -267,6 +217,21 @@
                                            required maxlength="255" placeholder="seuemail@exemplo.com">
                                 </div>
 
+                                <div class="col-md-4">
+                                    <label for="dataDesejada" class="form-label">Data desejada</label>
+                                    <input type="date" id="dataDesejada" name="dataDesejada" class="form-control form-control-lg" required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="horaInicioDesejada" class="form-label">Hora inicial</label>
+                                    <input type="time" id="horaInicioDesejada" name="horaInicioDesejada" class="form-control form-control-lg" required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="horaFimDesejada" class="form-label">Hora final</label>
+                                    <input type="time" id="horaFimDesejada" name="horaFimDesejada" class="form-control form-control-lg" required>
+                                </div>
+
                                 <div class="col-12">
                                     <label for="motivoAluguel" class="form-label">Motivo do aluguel</label>
                                     <textarea id="motivoAluguel" name="motivoAluguel" class="form-control"
@@ -275,16 +240,13 @@
                                 </div>
 
                                 <div class="col-12">
-                                    <div class="alert alert-light border rounded-4 mb-0" id="avisoSelecaoDisponibilidade">
+                                    <div class="alert alert-light border rounded-4 mb-0" id="avisoSolicitacao">
                                         <i class="bi bi-exclamation-circle me-2 text-primary"></i>
-                                        Antes de enviar, selecione uma data e horário na seção de disponibilidade acima.
+                                        O envio da solicitação não confirma automaticamente a reserva. A Secretaria entrará em contato após verificar a disponibilidade.
                                     </div>
                                 </div>
 
                                 <div class="col-12 d-grid d-md-flex justify-content-md-end gap-2">
-                                    <a href="#disponibilidades" class="btn btn-outline-primary btn-lg">
-                                        <i class="bi bi-calendar3 me-2"></i>Escolher data
-                                    </a>
                                     <button type="submit" class="btn btn-primary btn-lg">
                                         <i class="bi bi-send-check me-2"></i>Enviar solicitação
                                     </button>
@@ -325,40 +287,29 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const botoesDisponibilidade = document.querySelectorAll('.salao-disponibilidade-card');
-        const valorTexto = document.getElementById('valorSelecionadoTexto');
-        const dataTexto = document.getElementById('dataSelecionadaTexto');
-        const idDisponibilidade = document.getElementById('idDisponibilidade');
-        const avisoSelecao = document.getElementById('avisoSelecaoDisponibilidade');
-        const form = document.getElementById('formSolicitacaoSalao');
-
-        botoesDisponibilidade.forEach(function (botao) {
-            botao.addEventListener('click', function () {
-                botoesDisponibilidade.forEach(function (item) {
-                    item.classList.remove('salao-disponibilidade-card-selecionado');
-                });
-
-                this.classList.add('salao-disponibilidade-card-selecionado');
-                idDisponibilidade.value = this.dataset.id;
-                valorTexto.textContent = 'R$ ' + this.dataset.valor;
-                dataTexto.textContent = this.dataset.data + ' - ' + this.dataset.horario;
-
-                if (avisoSelecao) {
-                    avisoSelecao.classList.remove('alert-light');
-                    avisoSelecao.classList.add('alert-success');
-                    avisoSelecao.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Data e horário selecionados: ' + this.dataset.data + ' - ' + this.dataset.horario;
-                }
-
-                document.getElementById('solicitar').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-
         const tipoDocumento = document.getElementById('tipoDocumento');
         const documento = document.getElementById('documento');
         const celular = document.getElementById('celular');
+        const dataDesejada = document.getElementById('dataDesejada');
+        const horaInicio = document.getElementById('horaInicioDesejada');
+        const horaFim = document.getElementById('horaFimDesejada');
+        const periodoTexto = document.getElementById('periodoSolicitadoTexto');
+        const periodoDetalhe = document.getElementById('periodoSolicitadoDetalhe');
+        const form = document.getElementById('formSolicitacaoSalao');
 
         function somenteNumeros(valor) {
             return (valor || '').replace(/\D/g, '');
+        }
+
+        function dataHojeISO() {
+            const hoje = new Date();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            return hoje.getFullYear() + '-' + mes + '-' + dia;
+        }
+
+        if (dataDesejada) {
+            dataDesejada.min = dataHojeISO();
         }
 
         function mascararDocumento() {
@@ -385,6 +336,19 @@
             celular.value = valor;
         }
 
+        function formatarDataBR(dataISO) {
+            if (!dataISO) return '';
+            const partes = dataISO.split('-');
+            return partes[2] + '/' + partes[1] + '/' + partes[0];
+        }
+
+        function atualizarResumoPeriodo() {
+            if (dataDesejada.value && horaInicio.value && horaFim.value) {
+                periodoTexto.textContent = formatarDataBR(dataDesejada.value);
+                periodoDetalhe.textContent = horaInicio.value + ' às ' + horaFim.value;
+            }
+        }
+
         if (tipoDocumento && documento) {
             tipoDocumento.addEventListener('change', mascararDocumento);
             documento.addEventListener('input', mascararDocumento);
@@ -394,12 +358,23 @@
             celular.addEventListener('input', mascararCelular);
         }
 
+        [dataDesejada, horaInicio, horaFim].forEach(function (campo) {
+            if (campo) campo.addEventListener('change', atualizarResumoPeriodo);
+        });
+
         if (form) {
             form.addEventListener('submit', function (event) {
-                if (!idDisponibilidade.value) {
+                if (dataDesejada.value && dataDesejada.value < dataHojeISO()) {
                     event.preventDefault();
-                    alert('Selecione uma data e horário disponível antes de enviar a solicitação.');
-                    document.getElementById('disponibilidades').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    alert('A data desejada não pode ser anterior à data atual.');
+                    dataDesejada.focus();
+                    return;
+                }
+
+                if (horaInicio.value && horaFim.value && horaFim.value <= horaInicio.value) {
+                    event.preventDefault();
+                    alert('O horário final deve ser maior que o horário inicial.');
+                    horaFim.focus();
                     return;
                 }
 

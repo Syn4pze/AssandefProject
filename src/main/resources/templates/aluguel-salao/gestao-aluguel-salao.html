@@ -27,15 +27,12 @@
         <div class="page-header">
             <div>
                 <h1 class="page-title"><i class="bi bi-calendar2-event me-2"></i>Gestão do Aluguel do Salão</h1>
-                <p class="text-muted mb-0">Cadastre disponibilidades, acompanhe solicitações e confirme reservas do salão.</p>
+                <p class="text-muted mb-0">Acompanhe solicitações recebidas, entre em contato com os responsáveis e confirme os aluguéis do salão.</p>
             </div>
             <div class="page-actions">
                 <a th:href="@{/aluguel-salao}" target="_blank" class="btn btn-outline-secondary me-2">
                     <i class="bi bi-box-arrow-up-right me-2"></i>Ver página pública
                 </a>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDisponibilidade" onclick="abrirNovaDisponibilidade()">
-                    <i class="bi bi-plus-circle me-2"></i>Nova Disponibilidade
-                </button>
             </div>
         </div>
 
@@ -45,11 +42,11 @@
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                            <i class="bi bi-calendar-check text-primary fs-3"></i>
+                            <i class="bi bi-inbox text-primary fs-3"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Disponibilidades cadastradas</div>
-                            <div class="fw-bold fs-5 text-primary" th:text="${disponibilidades != null ? #lists.size(disponibilidades) : 0}">0</div>
+                            <div class="text-muted small">Solicitações recebidas</div>
+                            <div class="fw-bold fs-5 text-primary" th:text="${totalSolicitacoes != null ? totalSolicitacoes : 0}">0</div>
                         </div>
                     </div>
                 </div>
@@ -61,8 +58,8 @@
                             <i class="bi bi-hourglass-split text-warning fs-3"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Solicitações recebidas</div>
-                            <div class="fw-bold fs-5 text-warning" th:text="${solicitacoes != null ? #lists.size(solicitacoes) : 0}">0</div>
+                            <div class="text-muted small">Pendentes de análise</div>
+                            <div class="fw-bold fs-5 text-warning" th:text="${totalPendentes != null ? totalPendentes : 0}">0</div>
                         </div>
                     </div>
                 </div>
@@ -74,249 +71,108 @@
                             <i class="bi bi-check2-circle text-success fs-3"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Controle da Secretaria</div>
-                            <div class="fw-bold fs-5 text-success">Ativo</div>
+                            <div class="text-muted small">Aluguéis confirmados</div>
+                            <div class="fw-bold fs-5 text-success" th:text="${totalAlugadas != null ? totalAlugadas : 0}">0</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <ul class="nav nav-tabs mt-4" id="aluguelSalaoTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active p-2" id="solicitacoes-tab"
-                        data-bs-toggle="tab" data-bs-target="#solicitacoes-pane"
-                        type="button" role="tab" aria-controls="solicitacoes-pane" aria-selected="true">
-                    <i class="bi bi-inbox me-2"></i>Solicitações
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link p-2" id="disponibilidades-tab"
-                        data-bs-toggle="tab" data-bs-target="#disponibilidades-pane"
-                        type="button" role="tab" aria-controls="disponibilidades-pane" aria-selected="false">
-                    <i class="bi bi-calendar-week me-2"></i>Disponibilidades
-                </button>
-            </li>
-        </ul>
-
-        <div class="tab-content card" id="aluguelSalaoTabsContent">
-
-            <!-- Solicitações -->
-            <div class="tab-pane fade show active" id="solicitacoes-pane" role="tabpanel" tabindex="0">
-                <div class="card-body">
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-8">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="buscaSolicitacao"
-                                       placeholder="Buscar por nome, documento, e-mail, celular ou status..."
-                                       onkeyup="filtrarTabela('buscaSolicitacao', 'tabelaSolicitacoes')">
-                                <button class="btn btn-outline-primary" type="button"><i class="bi bi-search"></i></button>
-                            </div>
-                        </div>
+        <div class="card border-0 shadow-sm rounded-4 mt-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-5">
+                        <h2 class="h5 mb-1"><i class="bi bi-list-check me-2 text-primary"></i>Solicitações de aluguel</h2>
+                        <p class="text-muted mb-0 small">Solicitações enviadas pela página pública do salão.</p>
                     </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="tabelaSolicitacoes">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Solicitante</th>
-                                <th>Contato</th>
-                                <th>Data/Horário</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Solicitada em</th>
-                                <th class="text-end">Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="sol : ${solicitacoes}">
-                                <td>
-                                    <div class="fw-semibold" th:text="${sol.nomeResponsavel}">Nome</div>
-                                    <div class="text-muted small">
-                                        <span th:text="${sol.tipoDocumento}">CPF</span>:
-                                        <span th:text="${sol.documento}">000.000.000-00</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <a class="text-decoration-none" th:href="${'mailto:' + sol.email}" th:text="${sol.email}">email</a>
-                                    </div>
-                                    <div>
-                                        <a class="text-decoration-none" th:href="${'tel:' + sol.celular}" th:text="${sol.celular}">celular</a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div th:if="${sol.disponibilidade != null}">
-                                        <div class="fw-semibold" th:text="${#temporals.format(sol.disponibilidade.dataLocacao, 'dd/MM/yyyy')}">20/06/2026</div>
-                                        <div class="text-muted small"
-                                             th:text="${#temporals.format(sol.disponibilidade.horaInicio, 'HH:mm') + ' às ' + #temporals.format(sol.disponibilidade.horaFim, 'HH:mm')}">14:00 às 18:00</div>
-                                    </div>
-                                    <span th:if="${sol.disponibilidade == null}" class="text-muted">-</span>
-                                </td>
-                                <td th:text="${'R$ ' + #numbers.formatDecimal(sol.valorApresentado != null ? sol.valorApresentado : 0, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
-                                <td>
-                                    <span th:if="${sol.status != null and sol.status.name() == 'PENDENTE'}" class="badge bg-warning text-dark">Pendente</span>
-                                    <span th:if="${sol.status != null and sol.status.name() == 'EM_CONTATO'}" class="badge bg-info text-dark">Em contato</span>
-                                    <span th:if="${sol.status != null and sol.status.name() == 'APROVADA'}" class="badge bg-success">Aprovada</span>
-                                    <span th:if="${sol.status != null and sol.status.name() == 'RECUSADA'}" class="badge bg-danger">Recusada</span>
-                                    <span th:if="${sol.status != null and sol.status.name() == 'CANCELADA'}" class="badge bg-secondary">Cancelada</span>
-                                </td>
-                                <td th:text="${sol.dataSolicitacao != null ? #temporals.format(sol.dataSolicitacao, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-info me-1" title="Detalhes"
-                                            data-bs-toggle="modal" data-bs-target="#modalDetalhesSolicitacao"
-                                            th:attr="data-nome=${sol.nomeResponsavel},
-                                                     data-documento=${sol.tipoDocumento + ': ' + sol.documento},
-                                                     data-email=${sol.email},
-                                                     data-celular=${sol.celular},
-                                                     data-motivo=${sol.motivoAluguel},
-                                                     data-observacao=${sol.observacaoSecretaria != null ? sol.observacaoSecretaria : ''}">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-
-                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Alterar status"
-                                            data-bs-toggle="modal" data-bs-target="#modalStatusSolicitacao"
-                                            th:attr="data-id=${sol.idSolicitacao}, data-status=${sol.status}, data-observacao=${sol.observacaoSecretaria != null ? sol.observacaoSecretaria : ''}">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr th:if="${solicitacoes == null or #lists.isEmpty(solicitacoes)}">
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>Nenhuma solicitação recebida.
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <div class="col-md-7">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="buscaSolicitacao"
+                                   placeholder="Buscar por nome, documento, e-mail, celular, data ou status..."
+                                   onkeyup="filtrarTabela('buscaSolicitacao', 'tabelaSolicitacoes')">
+                            <button class="btn btn-outline-primary" type="button"><i class="bi bi-search"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Disponibilidades -->
-            <div class="tab-pane fade" id="disponibilidades-pane" role="tabpanel" tabindex="0">
-                <div class="card-body">
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-8">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="buscaDisponibilidade"
-                                       placeholder="Buscar por data, horário, valor ou status..."
-                                       onkeyup="filtrarTabela('buscaDisponibilidade', 'tabelaDisponibilidades')">
-                                <button class="btn btn-outline-primary" type="button"><i class="bi bi-search"></i></button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card-body px-4 pb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="tabelaSolicitacoes">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Solicitante</th>
+                            <th>Contato</th>
+                            <th>Data/Horário pretendido</th>
+                            <th>Status</th>
+                            <th>Solicitada em</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="sol : ${solicitacoes}">
+                            <td>
+                                <div class="fw-semibold" th:text="${sol.nomeResponsavel}">Nome</div>
+                                <div class="text-muted small">
+                                    <span th:text="${sol.tipoDocumento}">CPF</span>:
+                                    <span th:text="${sol.documento}">000.000.000-00</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <a class="text-decoration-none" th:href="${'mailto:' + sol.email}" th:text="${sol.email}">email</a>
+                                </div>
+                                <div>
+                                    <a class="text-decoration-none" th:href="${'tel:' + sol.celular}" th:text="${sol.celular}">celular</a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold" th:text="${sol.dataDesejada != null ? #temporals.format(sol.dataDesejada, 'dd/MM/yyyy') : '-'}">20/06/2026</div>
+                                <div class="text-muted small"
+                                     th:text="${sol.horaInicioDesejada != null and sol.horaFimDesejada != null ? #temporals.format(sol.horaInicioDesejada, 'HH:mm') + ' às ' + #temporals.format(sol.horaFimDesejada, 'HH:mm') : '-'}">14:00 às 18:00</div>
+                            </td>
+                            <td>
+                                <span th:if="${sol.status != null and sol.status.name() == 'PENDENTE'}" class="badge bg-warning text-dark">Pendente</span>
+                                <span th:if="${sol.status != null and sol.status.name() == 'EM_CONTATO'}" class="badge bg-info text-dark">Em contato</span>
+                                <span th:if="${sol.status != null and sol.status.name() == 'ALUGADO'}" class="badge bg-success">Alugado</span>
+                                <span th:if="${sol.status != null and sol.status.name() == 'RECUSADA'}" class="badge bg-danger">Recusada</span>
+                                <span th:if="${sol.status != null and sol.status.name() == 'CANCELADA'}" class="badge bg-secondary">Cancelada</span>
+                            </td>
+                            <td th:text="${sol.dataSolicitacao != null ? #temporals.format(sol.dataSolicitacao, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-info me-1" title="Detalhes"
+                                        data-bs-toggle="modal" data-bs-target="#modalDetalhesSolicitacao"
+                                        th:attr="data-nome=${sol.nomeResponsavel},
+                                                 data-documento=${sol.tipoDocumento + ': ' + sol.documento},
+                                                 data-email=${sol.email},
+                                                 data-celular=${sol.celular},
+                                                 data-data=${sol.dataDesejada != null ? #temporals.format(sol.dataDesejada, 'dd/MM/yyyy') : '-'},
+                                                 data-horario=${sol.horaInicioDesejada != null and sol.horaFimDesejada != null ? #temporals.format(sol.horaInicioDesejada, 'HH:mm') + ' às ' + #temporals.format(sol.horaFimDesejada, 'HH:mm') : '-'},
+                                                 data-motivo=${sol.motivoAluguel},
+                                                 data-observacao=${sol.observacaoSecretaria != null ? sol.observacaoSecretaria : ''}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="tabelaDisponibilidades">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Data</th>
-                                <th>Horário</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Observação</th>
-                                <th class="text-end">Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="disp : ${disponibilidades}">
-                                <td th:text="${disp.dataLocacao != null ? #temporals.format(disp.dataLocacao, 'dd/MM/yyyy') : '-'}">20/06/2026</td>
-                                <td th:text="${disp.horaInicio != null and disp.horaFim != null ? #temporals.format(disp.horaInicio, 'HH:mm') + ' às ' + #temporals.format(disp.horaFim, 'HH:mm') : '-'}">14:00 às 18:00</td>
-                                <td th:text="${'R$ ' + #numbers.formatDecimal(disp.valor != null ? disp.valor : 0, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
-                                <td>
-                                    <span th:if="${disp.status != null and disp.status.name() == 'DISPONIVEL'}" class="badge bg-success">Disponível</span>
-                                    <span th:if="${disp.status != null and disp.status.name() == 'EM_ANALISE'}" class="badge bg-warning text-dark">Em análise</span>
-                                    <span th:if="${disp.status != null and disp.status.name() == 'RESERVADO'}" class="badge bg-primary">Reservado</span>
-                                    <span th:if="${disp.status != null and disp.status.name() == 'BLOQUEADO'}" class="badge bg-secondary">Bloqueado</span>
-                                </td>
-                                <td th:text="${disp.observacao != null and !#strings.isEmpty(disp.observacao) ? disp.observacao : '-'}">-</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-secondary me-1" title="Editar"
-                                            data-bs-toggle="modal" data-bs-target="#modalDisponibilidade"
-                                            th:attr="data-id=${disp.idDisponibilidade}"
-                                            onclick="editarDisponibilidade(this)">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <form th:action="@{/aluguel-salao/gestao/disponibilidades/excluir/{id}(id=${disp.idDisponibilidade})}" method="post" class="d-inline" onsubmit="return confirm('Deseja realmente excluir esta disponibilidade?');">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr th:if="${disponibilidades == null or #lists.isEmpty(disponibilidades)}">
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>Nenhuma disponibilidade cadastrada.
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" title="Alterar status"
+                                        data-bs-toggle="modal" data-bs-target="#modalStatusSolicitacao"
+                                        th:attr="data-id=${sol.idSolicitacao}, data-status=${sol.status}, data-observacao=${sol.observacaoSecretaria != null ? sol.observacaoSecretaria : ''}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${solicitacoes == null or #lists.isEmpty(solicitacoes)}">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>Nenhuma solicitação recebida.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
         </div>
     </div>
 </main>
-
-<!-- Modal: Disponibilidade -->
-<div class="modal fade" id="modalDisponibilidade" tabindex="-1" aria-labelledby="modalDisponibilidadeLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <form th:action="@{/aluguel-salao/gestao/disponibilidades/salvar}" th:object="${disponibilidadeForm}" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalDisponibilidadeLabel">Nova Disponibilidade</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="idDisponibilidade" th:field="*{idDisponibilidade}">
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label for="dataLocacao" class="form-label">Data</label>
-                            <input type="date" id="dataLocacao" class="form-control" th:field="*{dataLocacao}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="horaInicio" class="form-label">Hora inicial</label>
-                            <input type="time" id="horaInicio" class="form-control" th:field="*{horaInicio}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="horaFim" class="form-label">Hora final</label>
-                            <input type="time" id="horaFim" class="form-control" th:field="*{horaFim}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="valor" class="form-label">Valor</label>
-                            <input type="number" id="valor" class="form-control" th:field="*{valor}" min="0" step="0.01" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="status" class="form-label">Status</label>
-                            <select id="status" class="form-select" th:field="*{status}" required>
-                                <option th:each="statusItem : ${statusDisponibilidade}"
-                                        th:value="${statusItem}"
-                                        th:text="${statusItem.name() == 'DISPONIVEL' ? 'Disponível' : (statusItem.name() == 'EM_ANALISE' ? 'Em análise' : (statusItem.name() == 'RESERVADO' ? 'Reservado' : 'Bloqueado'))}">
-                                    Disponível
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label for="observacao" class="form-label">Observação</label>
-                            <textarea id="observacao" class="form-control" th:field="*{observacao}" rows="3"
-                                      placeholder="Ex.: manutenção, uso interno, observação sobre o horário..."></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-2"></i>Salvar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- Modal: Status da Solicitação -->
 <div class="modal fade" id="modalStatusSolicitacao" tabindex="-1" aria-labelledby="modalStatusSolicitacaoLabel" aria-hidden="true">
@@ -334,7 +190,7 @@
                         <select id="statusSolicitacao" name="status" class="form-select" required>
                             <option th:each="statusItem : ${statusSolicitacao}"
                                     th:value="${statusItem}"
-                                    th:text="${statusItem.name() == 'PENDENTE' ? 'Pendente' : (statusItem.name() == 'EM_CONTATO' ? 'Em contato' : (statusItem.name() == 'APROVADA' ? 'Aprovada' : (statusItem.name() == 'RECUSADA' ? 'Recusada' : 'Cancelada')))}">
+                                    th:text="${statusItem.name() == 'PENDENTE' ? 'Pendente' : (statusItem.name() == 'EM_CONTATO' ? 'Em contato' : (statusItem.name() == 'ALUGADO' ? 'Alugado' : (statusItem.name() == 'RECUSADA' ? 'Recusada' : 'Cancelada')))}">
                                 Pendente
                             </option>
                         </select>
@@ -378,6 +234,12 @@
                     <dt class="col-sm-3">Celular</dt>
                     <dd class="col-sm-9" id="detalheCelular">-</dd>
 
+                    <dt class="col-sm-3">Data pretendida</dt>
+                    <dd class="col-sm-9" id="detalheData">-</dd>
+
+                    <dt class="col-sm-3">Horário pretendido</dt>
+                    <dd class="col-sm-9" id="detalheHorario">-</dd>
+
                     <dt class="col-sm-3">Motivo</dt>
                     <dd class="col-sm-9" id="detalheMotivo">-</dd>
 
@@ -406,42 +268,6 @@
         });
     }
 
-    function abrirNovaDisponibilidade() {
-        document.getElementById('modalDisponibilidadeLabel').textContent = 'Nova Disponibilidade';
-        document.getElementById('idDisponibilidade').value = '';
-        document.getElementById('dataLocacao').value = '';
-        document.getElementById('horaInicio').value = '';
-        document.getElementById('horaFim').value = '';
-        document.getElementById('valor').value = '';
-        document.getElementById('status').value = 'DISPONIVEL';
-        document.getElementById('observacao').value = '';
-    }
-
-    function editarDisponibilidade(botao) {
-        const id = botao.getAttribute('data-id');
-        document.getElementById('modalDisponibilidadeLabel').textContent = 'Editar Disponibilidade';
-
-        fetch('/aluguel-salao/gestao/disponibilidades/json/' + id)
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('Erro ao buscar disponibilidade.');
-                }
-                return response.json();
-            })
-            .then(function (disp) {
-                document.getElementById('idDisponibilidade').value = disp.idDisponibilidade || '';
-                document.getElementById('dataLocacao').value = disp.dataLocacao || '';
-                document.getElementById('horaInicio').value = disp.horaInicio || '';
-                document.getElementById('horaFim').value = disp.horaFim || '';
-                document.getElementById('valor').value = disp.valor || '';
-                document.getElementById('status').value = disp.status || 'DISPONIVEL';
-                document.getElementById('observacao').value = disp.observacao || '';
-            })
-            .catch(function (error) {
-                alert(error.message);
-            });
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
         const modalStatus = document.getElementById('modalStatusSolicitacao');
         if (modalStatus) {
@@ -465,6 +291,8 @@
                 document.getElementById('detalheDocumento').textContent = botao.getAttribute('data-documento') || '-';
                 document.getElementById('detalheEmail').textContent = botao.getAttribute('data-email') || '-';
                 document.getElementById('detalheCelular').textContent = botao.getAttribute('data-celular') || '-';
+                document.getElementById('detalheData').textContent = botao.getAttribute('data-data') || '-';
+                document.getElementById('detalheHorario').textContent = botao.getAttribute('data-horario') || '-';
                 document.getElementById('detalheMotivo').textContent = botao.getAttribute('data-motivo') || '-';
                 document.getElementById('detalheObservacao').textContent = botao.getAttribute('data-observacao') || '-';
             });

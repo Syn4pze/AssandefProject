@@ -1,16 +1,14 @@
 package br.org.assandef.assandefsystem.service;
 
-import br.org.assandef.assandefsystem.model.DisponibilidadeSalao;
-import br.org.assandef.assandefsystem.model.DisponibilidadeSalao.StatusDisponibilidadeSalao;
 import br.org.assandef.assandefsystem.model.Funcionario;
 import br.org.assandef.assandefsystem.model.SolicitacaoAluguelSalao;
 import br.org.assandef.assandefsystem.model.SolicitacaoAluguelSalao.StatusSolicitacaoAluguelSalao;
-import br.org.assandef.assandefsystem.repository.DisponibilidadeSalaoRepository;
 import br.org.assandef.assandefsystem.repository.SolicitacaoAluguelSalaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,8 +17,6 @@ import java.util.List;
 public class SolicitacaoAluguelSalaoService {
 
     private final SolicitacaoAluguelSalaoRepository solicitacaoAluguelSalaoRepository;
-    private final DisponibilidadeSalaoRepository disponibilidadeSalaoRepository;
-    private final DisponibilidadeSalaoService disponibilidadeSalaoService;
 
     public List<SolicitacaoAluguelSalao> findAll() {
         return solicitacaoAluguelSalaoRepository.findAllByOrderByDataSolicitacaoDesc();
@@ -38,27 +34,17 @@ public class SolicitacaoAluguelSalaoService {
     }
 
     @Transactional
-    public SolicitacaoAluguelSalao criarSolicitacaoPublica(Integer idDisponibilidade, SolicitacaoAluguelSalao solicitacao) {
-        DisponibilidadeSalao disponibilidade = disponibilidadeSalaoService.findById(idDisponibilidade);
-
-        if (disponibilidade.getStatus() != StatusDisponibilidadeSalao.DISPONIVEL) {
-            throw new RuntimeException("A data e horário selecionados não estão mais disponíveis.");
-        }
+    public SolicitacaoAluguelSalao criarSolicitacaoPublica(SolicitacaoAluguelSalao solicitacao) {
+        validarSolicitacaoPublica(solicitacao);
 
         solicitacao.setIdSolicitacao(null);
-        solicitacao.setDisponibilidade(disponibilidade);
-        solicitacao.setValorApresentado(disponibilidade.getValor());
+        solicitacao.setValorApresentado(null);
         solicitacao.setStatus(StatusSolicitacaoAluguelSalao.PENDENTE);
         solicitacao.setDataAnalise(null);
         solicitacao.setFuncionarioResponsavel(null);
         solicitacao.setObservacaoSecretaria(null);
 
-        SolicitacaoAluguelSalao solicitacaoSalva = solicitacaoAluguelSalaoRepository.save(solicitacao);
-
-        disponibilidade.setStatus(StatusDisponibilidadeSalao.EM_ANALISE);
-        disponibilidadeSalaoRepository.save(disponibilidade);
-
-        return solicitacaoSalva;
+        return solicitacaoAluguelSalaoRepository.save(solicitacao);
     }
 
     @Transactional
@@ -69,24 +55,26 @@ public class SolicitacaoAluguelSalaoService {
             Funcionario funcionarioResponsavel) {
 
         SolicitacaoAluguelSalao solicitacao = findById(idSolicitacao);
+
+        if (novoStatus == StatusSolicitacaoAluguelSalao.ALUGADO) {
+            boolean existeConflito = solicitacaoAluguelSalaoRepository.existsSolicitacaoAlugadaConflitante(
+                    solicitacao.getIdSolicitacao(),
+                    StatusSolicitacaoAluguelSalao.ALUGADO,
+                    solicitacao.getDataDesejada(),
+                    solicitacao.getHoraInicioDesejada(),
+                    solicitacao.getHoraFimDesejada()
+            );
+
+            if (existeConflito) {
+                throw new RuntimeException("Já existe uma solicitação marcada como alugada para essa data e faixa de horário.");
+            }
+        }
+
         solicitacao.setStatus(novoStatus);
         solicitacao.setObservacaoSecretaria(observacaoSecretaria);
         solicitacao.setFuncionarioResponsavel(funcionarioResponsavel);
         solicitacao.setDataAnalise(LocalDateTime.now());
 
-        DisponibilidadeSalao disponibilidade = solicitacao.getDisponibilidade();
-
-        if (novoStatus == StatusSolicitacaoAluguelSalao.APROVADA) {
-            disponibilidade.setStatus(StatusDisponibilidadeSalao.RESERVADO);
-        } else if (novoStatus == StatusSolicitacaoAluguelSalao.RECUSADA
-                || novoStatus == StatusSolicitacaoAluguelSalao.CANCELADA) {
-            disponibilidade.setStatus(StatusDisponibilidadeSalao.DISPONIVEL);
-        } else if (novoStatus == StatusSolicitacaoAluguelSalao.EM_CONTATO
-                || novoStatus == StatusSolicitacaoAluguelSalao.PENDENTE) {
-            disponibilidade.setStatus(StatusDisponibilidadeSalao.EM_ANALISE);
-        }
-
-        disponibilidadeSalaoRepository.save(disponibilidade);
         return solicitacaoAluguelSalaoRepository.save(solicitacao);
     }
 
@@ -96,5 +84,23 @@ public class SolicitacaoAluguelSalaoService {
             throw new RuntimeException("Solicitação de aluguel não encontrada com ID: " + id);
         }
         solicitacaoAluguelSalaoRepository.deleteById(id);
+    }
+
+    private void validarSolicitacaoPublica(SolicitacaoAluguelSalao solicitacao) {
+        if (solicitacao.getDataDesejada() == null) {
+            throw new RuntimeException("Informe a data desejada para o aluguel.");
+        }
+
+        if (solicitacao.getDataDesejada().isBefore(LocalDate.now())) {
+            throw new RuntimeException("A data desejada não pode ser anterior à data atual.");
+        }
+
+        if (solicitacao.getHoraInicioDesejada() == null || solicitacao.getHoraFimDesejada() == null) {
+            throw new RuntimeException("Informe o horário inicial e final desejado.");
+        }
+
+        if (!solicitacao.getHoraFimDesejada().isAfter(solicitacao.getHoraInicioDesejada())) {
+            throw new RuntimeException("O horário final deve ser maior que o horário inicial.");
+        }
     }
 }
