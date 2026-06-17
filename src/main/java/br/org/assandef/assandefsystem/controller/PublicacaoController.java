@@ -31,14 +31,14 @@ public class PublicacaoController {
     private final FuncionarioRepository funcionarioRepository;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String listar(Model model) {
         popularModelPublicacoes(model);
         return "gestao/publicacoes";
     }
 
     @GetMapping("/editar/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String editar(@PathVariable Integer id, Model model) {
         popularModelPublicacoes(model);
         model.addAttribute("publicacao", publicacaoService.buscarPorId(id));
@@ -48,7 +48,7 @@ public class PublicacaoController {
     }
 
     @PostMapping("/salvar")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String salvar(Publicacao publicacao,
                          @RequestParam(value = "arquivos", required = false) List<MultipartFile> arquivos,
                          @RequestParam(value = "linksYoutube", required = false) List<String> linksYoutube,
@@ -124,7 +124,7 @@ public class PublicacaoController {
     }
 
     @PostMapping("/publicar/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String publicar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             publicacaoService.publicar(id);
@@ -135,15 +135,27 @@ public class PublicacaoController {
         return "redirect:/gestao/publicacoes";
     }
 
+    @PostMapping("/arquivar/{id}")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
+    public String arquivar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            publicacaoService.arquivar(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Publicação removida da página pública com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("erro", "Erro ao ocultar publicação: " + e.getMessage());
+        }
+        return "redirect:/gestao/publicacoes";
+    }
+
     @GetMapping({"/{id}/json", "/publicacoes/{id}/json"})
     @ResponseBody
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public Map<String, Object> publicacaoJson(@PathVariable Integer id) {
         return publicacaoService.montarDadosJson(id);
     }
 
     @PostMapping("/imagem/excluir/{idImagem}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String excluirImagem(@PathVariable Integer idImagem,
                                 @RequestParam Integer idPublicacao,
                                 RedirectAttributes redirectAttributes) {
@@ -164,7 +176,7 @@ public class PublicacaoController {
     }
 
     @PostMapping("/video/excluir/{idVideo}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String excluirVideo(@PathVariable Integer idVideo,
                                @RequestParam Integer idPublicacao,
                                RedirectAttributes redirectAttributes) {
@@ -178,7 +190,7 @@ public class PublicacaoController {
     }
 
     @PostMapping("/excluir/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@authService.hasHierarquia(authentication, 1)")
     public String excluir(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             publicacaoService.listarImagensDaPublicacao(id)
@@ -198,9 +210,19 @@ public class PublicacaoController {
     }
 
     private void popularModelPublicacoes(Model model) {
-        model.addAttribute("publicacoes", publicacaoService.listarTodas());
+        List<Publicacao> publicacoes = publicacaoService.listarTodas();
+        model.addAttribute("publicacoes", publicacoes);
+        model.addAttribute("imagensPorPublicacao", publicacaoService.mapearImagensPorPublicacao(publicacoes));
         model.addAttribute("publicacao", new Publicacao());
         model.addAttribute("tipos", Publicacao.TipoConteudo.values());
+        model.addAttribute("proximosEventos", publicacoes.stream()
+                .filter(p -> p.getTipoConteudo() == Publicacao.TipoConteudo.EVENTO
+                        && p.getDataEvento() != null
+                        && p.getDataEvento().isAfter(java.time.LocalDateTime.now()))
+                .sorted(java.util.Comparator.comparing(Publicacao::getDataEvento))
+                .limit(3)
+                .toList());
         model.addAttribute("ativa", "publicacoes-gestao");
+        model.addAttribute("modoGestao", true);
     }
 }
