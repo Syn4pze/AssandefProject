@@ -87,7 +87,7 @@ public class AluguelSalaoController {
         return disponibilidadeSalaoService.findById(id);
     }
 
-    @GetMapping("/aluguel-salao/gestao/disponibilidades/excluir/{id}")
+    @PostMapping("/aluguel-salao/gestao/disponibilidades/excluir/{id}")
     public String excluirDisponibilidade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             disponibilidadeSalaoService.deleteById(id);

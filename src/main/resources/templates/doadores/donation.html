@@ -154,6 +154,17 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${doadoresPage != null}">
+                        <span class="text-muted small" th:text="|Página ${doadoresPage.number + 1} de ${doadoresPage.totalPages == 0 ? 1 : doadoresPage.totalPages}|">Página 1 de 1</span>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${doadoresPage.first} ? ' disabled' : ''"
+                               th:href="@{/doadores(pageDoadores=${doadoresPage.number - 1},sizeDoadores=${doadoresPage.size},pageBoletos=${boletosPage.number},sizeBoletos=${boletosPage.size})}">Anterior</a>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${doadoresPage.last} ? ' disabled' : ''"
+                               th:href="@{/doadores(pageDoadores=${doadoresPage.number + 1},sizeDoadores=${doadoresPage.size},pageBoletos=${boletosPage.number},sizeBoletos=${boletosPage.size})}">Próxima</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -238,6 +249,17 @@
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${boletosPage != null}">
+                        <span class="text-muted small" th:text="|Página ${boletosPage.number + 1} de ${boletosPage.totalPages == 0 ? 1 : boletosPage.totalPages}|">Página 1 de 1</span>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${boletosPage.first} ? ' disabled' : ''"
+                               th:href="@{/doadores(pageDoadores=${doadoresPage.number},sizeDoadores=${doadoresPage.size},pageBoletos=${boletosPage.number - 1},sizeBoletos=${boletosPage.size})}">Anterior</a>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${boletosPage.last} ? ' disabled' : ''"
+                               th:href="@{/doadores(pageDoadores=${doadoresPage.number},sizeDoadores=${doadoresPage.size},pageBoletos=${boletosPage.number + 1},sizeBoletos=${boletosPage.size})}">Próxima</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -361,7 +383,7 @@
                             <label for="boletoDoador" class="form-label">Doador *</label>
                             <select class="form-select" id="boletoDoador" name="doador.idDoador" required>
                                 <option value="">Selecione...</option>
-                                <option th:each="doador : ${doadores}" th:value="${doador.idDoador}" th:text="${doador.nome}">Doador</option>
+                                <option th:each="doador : ${doadoresSelect}" th:value="${doador.idDoador}" th:text="${doador.nome}">Doador</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -437,7 +459,7 @@
                             <label for="editBoletoDoador" class="form-label">Doador *</label>
                             <select class="form-select" id="editBoletoDoador" name="doador.idDoador" required>
                                 <option value="">Selecione...</option>
-                                <option th:each="doador : ${doadores}" th:value="${doador.idDoador}" th:text="${doador.nome}">Doador</option>
+                                <option th:each="doador : ${doadoresSelect}" th:value="${doador.idDoador}" th:text="${doador.nome}">Doador</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -631,6 +653,9 @@
 
 <script th:inline="javascript" defer>
     /*<![CDATA[*/
+    const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
+    const CSRF_PARAM = /*[[${_csrf.parameterName}]]*/ '';
+
     // ======================
     // MÁSCARAS DE INPUT (SEU CÓDIGO CORRETO)
     // ======================
@@ -946,9 +971,24 @@ function editarDoador(id) {
         });
 }
 
+function enviarPostComCsrf(url) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = CSRF_PARAM;
+    csrfInput.value = CSRF_TOKEN;
+    form.appendChild(csrfInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
     function confirmarExclusaoDoador(id) {
         if (confirm('Tem certeza que deseja excluir este doador?')) {
-            window.location.href = `/doadores/deletar/${id}`;
+            enviarPostComCsrf(`/doadores/deletar/${id}`);
         }
     }
 
@@ -988,19 +1028,19 @@ function editarDoador(id) {
 
     function confirmarExclusaoBoleto(id) {
         if (confirm('Tem certeza que deseja excluir este boleto?')) {
-            window.location.href = `/doadores/boleto/deletar/${id}`;
+            enviarPostComCsrf(`/doadores/boleto/deletar/${id}`);
         }
     }
 
     function marcarComoPago(id) {
         if (confirm('Marcar este boleto como pago?')) {
-            window.location.href = `/doadores/boleto/marcar-pago/${id}`;
+            enviarPostComCsrf(`/doadores/boleto/marcar-pago/${id}`);
         }
     }
 
     function marcarComoVencido(id) {
         if (confirm('Marcar este boleto como vencido?')) {
-            window.location.href = `/doadores/boleto/marcar-vencido/${id}`;
+            enviarPostComCsrf(`/doadores/boleto/marcar-vencido/${id}`);
         }
     }
 

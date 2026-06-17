@@ -485,6 +485,9 @@
   <!-- JavaScript da Página -->
   <script th:inline="javascript" defer>
     /*<![CDATA[*/
+    const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
+    const CSRF_PARAM = /*[[${_csrf.parameterName}]]*/ '';
+
     // Delegação centralizada para todos botões com data-action
     document.addEventListener('click', function (e) {
       const btn = e.target.closest('button[data-action]');
@@ -543,27 +546,42 @@
         .catch(err => alert('Erro ao carregar material: ' + err));
     }
 
+    function enviarPostComCsrf(url) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = CSRF_PARAM;
+      csrfInput.value = CSRF_TOKEN;
+      form.appendChild(csrfInput);
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
     function confirmarExclusao(id) {
       if (confirm('Tem certeza que deseja excluir este material?')) {
-        window.location.href = `/almoxarifado/material/deletar/${id}`;
+        enviarPostComCsrf(`/almoxarifado/material/deletar/${id}`);
       }
     }
 
     function confirmarExclusaoCategoria(id) {
       if (confirm('Excluir esta categoria?')) {
-        window.location.href = `/almoxarifado/categoria/deletar/${id}`;
+        enviarPostComCsrf(`/almoxarifado/categoria/deletar/${id}`);
       }
     }
 
     function aprovarSolicitacao(id) {
       if (confirm('Aprovar esta solicitação?')) {
-        window.location.href = `/almoxarifado/solicitacao/aprovar/${id}`;
+        enviarPostComCsrf(`/almoxarifado/solicitacao/aprovar/${id}`);
       }
     }
 
     function recusarSolicitacao(id) {
       if (confirm('Recusar esta solicitação?')) {
-        window.location.href = `/almoxarifado/solicitacao/recusar/${id}`;
+        enviarPostComCsrf(`/almoxarifado/solicitacao/recusar/${id}`);
       }
     }
    function visualizarSolicitacao(id) {

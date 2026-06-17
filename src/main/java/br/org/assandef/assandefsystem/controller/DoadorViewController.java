@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,19 +47,27 @@ public class DoadorViewController {
 
     // Página principal de administração (com modais de edição)
     @GetMapping
-    public String paginaAdministrativa(Model model,
-                                       @ModelAttribute("msg") String msg,
-                                       @ModelAttribute("erro") String erro) {
+    public String paginaAdministrativa(
+            @RequestParam(name = "pageDoadores", defaultValue = "0") int pageDoadores,
+            @RequestParam(name = "sizeDoadores", defaultValue = "10") int sizeDoadores,
+            @RequestParam(name = "pageBoletos", defaultValue = "0") int pageBoletos,
+            @RequestParam(name = "sizeBoletos", defaultValue = "10") int sizeBoletos,
+            Model model,
+            @ModelAttribute("msg") String msg,
+            @ModelAttribute("erro") String erro) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
             return "redirect:/login";
         }
 
-        List<Doador> doadores = doadorService.findAll();
-        List<Boleto> boletos = boletoService.findAll();
+        Page<Doador> doadoresPage = doadorService.findAll(PageRequest.of(pageDoadores, sizeDoadores, Sort.by(Sort.Direction.DESC, "idDoador")));
+        Page<Boleto> boletosPage = boletoService.findAll(PageRequest.of(pageBoletos, sizeBoletos, Sort.by(Sort.Direction.DESC, "idBoleto")));
 
-        model.addAttribute("doadores", doadores);
-        model.addAttribute("boletos", boletos);
+        model.addAttribute("doadores", doadoresPage.getContent());
+        model.addAttribute("doadoresSelect", doadorService.findAll());
+        model.addAttribute("boletos", boletosPage.getContent());
+        model.addAttribute("doadoresPage", doadoresPage);
+        model.addAttribute("boletosPage", boletosPage);
         model.addAttribute("doador", new Doador());
         model.addAttribute("boleto", new Boleto());
 
@@ -164,7 +175,7 @@ public class DoadorViewController {
     // EXCLUSÃO
     // ======================
 
-    @GetMapping("/deletar/{id}")
+    @PostMapping("/deletar/{id}")
     public String deletarDoador(@PathVariable("id") Integer idDoador, RedirectAttributes ra) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -264,7 +275,7 @@ public class DoadorViewController {
         return "redirect:/doadores";
     }
 
-    @GetMapping("/boleto/deletar/{id}")
+    @PostMapping("/boleto/deletar/{id}")
     public String deletarBoleto(@PathVariable("id") Integer idBoleto, RedirectAttributes ra) {
         try {
             Boleto boleto = boletoService.findById(idBoleto);
@@ -316,7 +327,7 @@ public class DoadorViewController {
         }
     }
 
-    @GetMapping("/boleto/marcar-pago/{id}")
+    @PostMapping("/boleto/marcar-pago/{id}")
     public String marcarBoletoComoPago(@PathVariable("id") Integer idBoleto, RedirectAttributes ra) {
         try {
             Boleto boleto = boletoService.findById(idBoleto);
@@ -329,7 +340,7 @@ public class DoadorViewController {
         return "redirect:/doadores";
     }
 
-    @GetMapping("/boleto/marcar-vencido/{id}")
+    @PostMapping("/boleto/marcar-vencido/{id}")
     public String marcarBoletoComoVencido(@PathVariable("id") Integer idBoleto, RedirectAttributes ra) {
         try {
             Boleto boleto = boletoService.findById(idBoleto);

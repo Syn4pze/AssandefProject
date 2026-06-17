@@ -64,9 +64,8 @@ public class FinanceiroController {
         return contaBancariaService.findById(id);
     }
 
-    // GET para exclusão (chamado via window.location.href no JS)
-    @GetMapping("/contas/excluir/{id}")
-    public String excluirContaGet(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/contas/excluir/{id}")
+    public String excluirContaPost(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             contaBancariaService.deleteById(id);
             redirectAttributes.addFlashAttribute("mensagem", "Conta excluída com sucesso!");
@@ -74,12 +73,6 @@ public class FinanceiroController {
             redirectAttributes.addFlashAttribute("erro", "Erro ao excluir conta: " + e.getMessage());
         }
         return "redirect:/financeiro";
-    }
-
-    // POST mantido para compatibilidade (caso use form POST em algum lugar)
-    @PostMapping("/contas/excluir/{id}")
-    public String excluirContaPost(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        return excluirContaGet(id, redirectAttributes);
     }
 
     // =========================================================
@@ -128,9 +121,8 @@ public class FinanceiroController {
         return movimentacaoFinanceiraService.findById(id);
     }
 
-    // GET para exclusão (chamado via window.location.href no JS)
-    @GetMapping("/movimentacoes/excluir/{id}")
-    public String excluirMovimentacaoGet(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/movimentacoes/excluir/{id}")
+    public String excluirMovimentacaoPost(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             movimentacaoFinanceiraService.deleteById(id);
             redirectAttributes.addFlashAttribute("mensagem", "Movimentação excluída com sucesso!");
@@ -138,11 +130,6 @@ public class FinanceiroController {
             redirectAttributes.addFlashAttribute("erro", "Erro ao excluir movimentação: " + e.getMessage());
         }
         return "redirect:/financeiro";
-    }
-
-    @PostMapping("/movimentacoes/excluir/{id}")
-    public String excluirMovimentacaoPost(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        return excluirMovimentacaoGet(id, redirectAttributes);
     }
 
     // =========================================================
@@ -178,9 +165,8 @@ public class FinanceiroController {
         return "redirect:/financeiro";
     }
 
-    // GET para exclusão (chamado via window.location.href no JS)
-    @GetMapping("/categorias/excluir/{id}")
-    public String excluirCategoriaGet(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/categorias/excluir/{id}")
+    public String excluirCategoriaPost(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             categoriaFinanceiraService.deleteById(id);
             redirectAttributes.addFlashAttribute("mensagem", "Categoria excluída com sucesso!");
@@ -188,11 +174,6 @@ public class FinanceiroController {
             redirectAttributes.addFlashAttribute("erro", "Erro ao excluir categoria: " + e.getMessage());
         }
         return "redirect:/financeiro";
-    }
-
-    @PostMapping("/categorias/excluir/{id}")
-    public String excluirCategoriaPost(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        return excluirCategoriaGet(id, redirectAttributes);
     }
 
     // =========================================================

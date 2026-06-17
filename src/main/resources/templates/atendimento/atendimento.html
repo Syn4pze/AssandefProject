@@ -124,6 +124,17 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${atendimentosPage != null}">
+                        <span class="text-muted small" th:text="|Página ${atendimentosPage.number + 1} de ${atendimentosPage.totalPages == 0 ? 1 : atendimentosPage.totalPages}|">Página 1 de 1</span>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${atendimentosPage.first} ? ' disabled' : ''"
+                               th:href="@{/atendimento(pageAtendimentos=${atendimentosPage.number - 1},sizeAtendimentos=${atendimentosPage.size})}">Anterior</a>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${atendimentosPage.last} ? ' disabled' : ''"
+                               th:href="@{/atendimento(pageAtendimentos=${atendimentosPage.number + 1},sizeAtendimentos=${atendimentosPage.size})}">Próxima</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -172,6 +183,17 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${atendimentosPage != null}">
+                        <span class="text-muted small" th:text="|Página ${atendimentosPage.number + 1} de ${atendimentosPage.totalPages == 0 ? 1 : atendimentosPage.totalPages}|">Página 1 de 1</span>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${atendimentosPage.first} ? ' disabled' : ''"
+                               th:href="@{/atendimento(pageAtendimentos=${atendimentosPage.number - 1},sizeAtendimentos=${atendimentosPage.size})}">Anterior</a>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${atendimentosPage.last} ? ' disabled' : ''"
+                               th:href="@{/atendimento(pageAtendimentos=${atendimentosPage.number + 1},sizeAtendimentos=${atendimentosPage.size})}">Próxima</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -721,9 +743,18 @@
         // Botão de confirmar exclusão
         document.getElementById('btnConfirmarExclusaoAtendimento').addEventListener('click', function() {
             if (idAtendimentoExcluir) {
-                const url = BASE_URL + 'atendimento/' + idAtendimentoExcluir + '/deletar';
-                console.log('Redirecionando para exclusão:', url);
-                window.location.href = url;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = BASE_URL + 'atendimento/' + idAtendimentoExcluir + '/deletar';
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = CSRF_PARAM;
+                csrfInput.value = CSRF_TOKEN;
+                form.appendChild(csrfInput);
+
+                document.body.appendChild(form);
+                form.submit();
             }
         });
 
