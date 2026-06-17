@@ -401,62 +401,41 @@ CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
 ) ENGINE=InnoDB COMMENT='Tokens usados no fluxo de recuperação de senha.';
 
 -- =================================================================
--- 19. DISPONIBILIDADES DO SALÃO
--- Controla datas, horários e valores disponíveis para locação do salão.
--- Entidade: DisponibilidadeSalao.java
--- =================================================================
-CREATE TABLE IF NOT EXISTS `disponibilidades_salao` (
-  `id_disponibilidade` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador único da disponibilidade.',
-  `data_locacao` DATE NOT NULL COMMENT 'Data disponível para aluguel do salão.',
-  `hora_inicio` TIME NOT NULL COMMENT 'Horário inicial disponível para locação.',
-  `hora_fim` TIME NOT NULL COMMENT 'Horário final disponível para locação.',
-  `valor` DECIMAL(10,2) NOT NULL COMMENT 'Valor definido pela administração para esta data e horário.',
-  `status` ENUM('DISPONIVEL', 'EM_ANALISE', 'RESERVADO', 'BLOQUEADO') NOT NULL DEFAULT 'DISPONIVEL' COMMENT 'Status da disponibilidade do salão.',
-  `observacao` TEXT NULL COMMENT 'Observação interna, como manutenção, uso interno ou detalhe sobre o horário.',
-  `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Data e hora de criação da disponibilidade.',
-  `data_atualizacao` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Data e hora da última atualização.',
-  PRIMARY KEY (`id_disponibilidade`),
-  UNIQUE INDEX `uk_disponibilidade_salao_data_horario` (`data_locacao`, `hora_inicio`, `hora_fim`),
-  INDEX `idx_disponibilidades_salao_status` (`status`),
-  INDEX `idx_disponibilidades_salao_data` (`data_locacao`),
-  CONSTRAINT `chk_disponibilidades_salao_horario` CHECK (`hora_fim` > `hora_inicio`),
-  CONSTRAINT `chk_disponibilidades_salao_valor` CHECK (`valor` >= 0)
-) ENGINE=InnoDB COMMENT='Datas, horários e valores disponíveis para aluguel do salão.';
-
--- =================================================================
--- 20. SOLICITAÇÕES DE ALUGUEL DO SALÃO
+-- 19. SOLICITAÇÕES DE ALUGUEL DO SALÃO
 -- Armazena as solicitações enviadas pelo formulário público de aluguel do salão.
+-- Novo fluxo: o usuário informa a data e o horário desejados, sem depender
+-- de cadastro prévio de disponibilidades pela secretaria.
 -- Entidade: SolicitacaoAluguelSalao.java
 -- =================================================================
 CREATE TABLE IF NOT EXISTS `solicitacoes_aluguel_salao` (
   `id_solicitacao` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador único da solicitação de aluguel.',
-  `id_disponibilidade` INT NOT NULL COMMENT 'Disponibilidade escolhida pelo usuário.',
   `nome_responsavel` VARCHAR(255) NOT NULL COMMENT 'Nome do responsável pela solicitação.',
   `tipo_documento` ENUM('CPF', 'CNPJ') NOT NULL COMMENT 'Tipo de documento informado pelo solicitante.',
   `documento` VARCHAR(18) NOT NULL COMMENT 'CPF ou CNPJ informado pelo solicitante.',
   `celular` VARCHAR(20) NOT NULL COMMENT 'Celular para contato com o solicitante.',
   `email` VARCHAR(255) NOT NULL COMMENT 'E-mail para contato com o solicitante.',
+  `data_desejada` DATE NOT NULL COMMENT 'Data desejada pelo usuário para aluguel do salão.',
+  `hora_inicio_desejada` TIME NOT NULL COMMENT 'Horário inicial desejado para a locação.',
+  `hora_fim_desejada` TIME NOT NULL COMMENT 'Horário final desejado para a locação.',
   `motivo_aluguel` TEXT NOT NULL COMMENT 'Finalidade ou motivo do aluguel do salão.',
-  `valor_apresentado` DECIMAL(10,2) NOT NULL COMMENT 'Valor exibido ao usuário no momento da solicitação.',
-  `status` ENUM('PENDENTE', 'EM_CONTATO', 'APROVADA', 'RECUSADA', 'CANCELADA') NOT NULL DEFAULT 'PENDENTE' COMMENT 'Status da solicitação de aluguel.',
+  `valor_apresentado` DECIMAL(10,2) NULL COMMENT 'Valor informado/apresentado pela secretaria, quando aplicável.',
+  `status` ENUM('PENDENTE', 'EM_CONTATO', 'ALUGADO', 'RECUSADA', 'CANCELADA') NOT NULL DEFAULT 'PENDENTE' COMMENT 'Status da solicitação de aluguel.',
   `observacao_secretaria` TEXT NULL COMMENT 'Observações internas da secretaria sobre a solicitação.',
   `id_funcionario_responsavel` INT NULL COMMENT 'Funcionário que analisou ou acompanhou a solicitação.',
   `data_solicitacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Data e hora em que a solicitação foi enviada.',
   `data_analise` DATETIME NULL COMMENT 'Data e hora em que a solicitação foi analisada.',
   `data_atualizacao` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Data e hora da última atualização.',
   PRIMARY KEY (`id_solicitacao`),
-  INDEX `fk_solicitacoes_aluguel_disponibilidades_idx` (`id_disponibilidade`),
   INDEX `fk_solicitacoes_aluguel_funcionarios_idx` (`id_funcionario_responsavel`),
   INDEX `idx_solicitacoes_aluguel_status` (`status`),
   INDEX `idx_solicitacoes_aluguel_documento` (`documento`),
   INDEX `idx_solicitacoes_aluguel_email` (`email`),
-  CONSTRAINT `fk_solicitacoes_aluguel_disponibilidades`
-    FOREIGN KEY (`id_disponibilidade`)
-    REFERENCES `disponibilidades_salao` (`id_disponibilidade`)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
+  INDEX `idx_solicitacoes_aluguel_data` (`data_desejada`),
+  INDEX `idx_solicitacoes_aluguel_data_horario` (`data_desejada`, `hora_inicio_desejada`, `hora_fim_desejada`),
   CONSTRAINT `fk_solicitacoes_aluguel_funcionarios`
     FOREIGN KEY (`id_funcionario_responsavel`)
     REFERENCES `funcionarios` (`id_funcionario`)
     ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `chk_solicitacoes_aluguel_valor` CHECK (`valor_apresentado` >= 0)
+  CONSTRAINT `chk_solicitacoes_aluguel_horario` CHECK (`hora_fim_desejada` > `hora_inicio_desejada`),
+  CONSTRAINT `chk_solicitacoes_aluguel_valor` CHECK (`valor_apresentado` IS NULL OR `valor_apresentado` >= 0)
 ) ENGINE=InnoDB COMMENT='Solicitações públicas de aluguel do salão da ASSANDEF.';

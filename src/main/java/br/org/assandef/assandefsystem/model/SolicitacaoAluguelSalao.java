@@ -7,7 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "solicitacoes_aluguel_salao")
@@ -19,18 +21,13 @@ public class SolicitacaoAluguelSalao {
     }
 
     public enum StatusSolicitacaoAluguelSalao {
-        PENDENTE, EM_CONTATO, APROVADA, RECUSADA, CANCELADA
+        PENDENTE, EM_CONTATO, ALUGADO, RECUSADA, CANCELADA
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_solicitacao")
     private Integer idSolicitacao;
-
-    @NotNull(message = "Disponibilidade é obrigatória")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_disponibilidade", nullable = false)
-    private DisponibilidadeSalao disponibilidade;
 
     @NotBlank(message = "Nome do responsável é obrigatório")
     @Column(name = "nome_responsavel", nullable = false)
@@ -54,11 +51,23 @@ public class SolicitacaoAluguelSalao {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @NotNull(message = "Data desejada é obrigatória")
+    @Column(name = "data_desejada", nullable = false)
+    private LocalDate dataDesejada;
+
+    @NotNull(message = "Hora inicial desejada é obrigatória")
+    @Column(name = "hora_inicio_desejada", nullable = false)
+    private LocalTime horaInicioDesejada;
+
+    @NotNull(message = "Hora final desejada é obrigatória")
+    @Column(name = "hora_fim_desejada", nullable = false)
+    private LocalTime horaFimDesejada;
+
     @NotBlank(message = "Motivo do aluguel é obrigatório")
     @Column(name = "motivo_aluguel", nullable = false, columnDefinition = "TEXT")
     private String motivoAluguel;
 
-    @Column(name = "valor_apresentado", nullable = false, precision = 10, scale = 2)
+    @Column(name = "valor_apresentado", precision = 10, scale = 2)
     private BigDecimal valorApresentado;
 
     @Enumerated(EnumType.STRING)
