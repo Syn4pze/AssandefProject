@@ -330,6 +330,23 @@
         }
     }
 
+    function validarCpf(cpf) {
+        const numeros = (cpf || '').replace(/\D/g, '');
+        if (numeros.length !== 11 || /^(\d)\1{10}$/.test(numeros)) return false;
+
+        let soma = 0;
+        for (let i = 0; i < 9; i++) soma += parseInt(numeros.charAt(i), 10) * (10 - i);
+        let resto = (soma * 10) % 11;
+        if (resto === 10) resto = 0;
+        if (resto !== parseInt(numeros.charAt(9), 10)) return false;
+
+        soma = 0;
+        for (let i = 0; i < 10; i++) soma += parseInt(numeros.charAt(i), 10) * (11 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10) resto = 0;
+        return resto === parseInt(numeros.charAt(10), 10);
+    }
+
     function limparFormulario() {
         console.log('Limpando formulário');
         document.getElementById('tituloModal').textContent = 'Novo Paciente';
@@ -460,6 +477,26 @@
         if (formPaciente) {
             formPaciente.addEventListener('submit', function(e) {
                 console.log('Validando formulário antes de enviar...');
+
+                const cpfInput = document.getElementById('cpf');
+                const cpfNumeros = cpfInput ? cpfInput.value.replace(/\D/g, '') : '';
+                if (cpfInput && cpfNumeros.length > 0) {
+                    if (cpfNumeros.length !== 11) {
+                        e.preventDefault();
+                        alert('CPF deve conter 11 dígitos.');
+                        cpfInput.focus();
+                        return;
+                    }
+
+                    if (!validarCpf(cpfNumeros)) {
+                        e.preventDefault();
+                        alert('Informe um CPF válido.');
+                        cpfInput.focus();
+                        return;
+                    }
+
+                    cpfInput.value = cpfNumeros;
+                }
 
                 // Remove campos de telefone vazios
                 const camposTelefone = document.querySelectorAll('#containerTelefones .telefone-item');
