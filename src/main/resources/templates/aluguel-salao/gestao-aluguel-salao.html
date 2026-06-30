@@ -5,7 +5,6 @@
 
 <header th:replace="~{fragments/base :: cabecalho}"></header>
 
-<!-- FLASH MESSAGES -->
 <div class="container mt-3" th:if="${(mensagem != null and !#strings.isEmpty(mensagem)) or (erro != null and !#strings.isEmpty(erro))}">
     <div class="alert alert-success alert-dismissible fade show" role="alert"
          th:if="${mensagem != null and !#strings.isEmpty(mensagem)}">
@@ -27,16 +26,18 @@
         <div class="page-header">
             <div>
                 <h1 class="page-title"><i class="bi bi-calendar2-event me-2"></i>Gestão do Aluguel do Salão</h1>
-                <p class="text-muted mb-0">Acompanhe solicitações recebidas, entre em contato com os responsáveis e confirme os aluguéis do salão.</p>
+                <p class="text-muted mb-0">Gerencie solicitações, planos de aluguel, fotos e reservas confirmadas do salão.</p>
             </div>
             <div class="page-actions">
                 <a th:href="@{/aluguel-salao}" target="_blank" class="btn btn-outline-secondary me-2">
                     <i class="bi bi-box-arrow-up-right me-2"></i>Ver página pública
                 </a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPlano">
+                    <i class="bi bi-plus-circle me-2"></i>Novo plano
+                </button>
             </div>
         </div>
 
-        <!-- Cards de Resumo -->
         <div class="row g-3 mt-2 mb-3">
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm rounded-4">
@@ -79,9 +80,32 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 mt-4">
-            <div class="card-header bg-white border-0 pt-4 px-4">
-                <div class="row g-3 align-items-center">
+        <ul class="nav nav-tabs mt-4" id="tabsAluguelSalao" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="solicitacoes-tab" data-bs-toggle="tab" data-bs-target="#solicitacoes" type="button" role="tab">
+                    <i class="bi bi-list-check me-2"></i>Solicitações
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="planos-tab" data-bs-toggle="tab" data-bs-target="#planos" type="button" role="tab">
+                    <i class="bi bi-card-checklist me-2"></i>Planos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fotos-tab" data-bs-toggle="tab" data-bs-target="#fotos" type="button" role="tab">
+                    <i class="bi bi-images me-2"></i>Fotos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="calendario-tab" data-bs-toggle="tab" data-bs-target="#calendario" type="button" role="tab">
+                    <i class="bi bi-calendar3 me-2"></i>Calendário
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content bg-white border border-top-0 rounded-bottom-4 shadow-sm p-4" id="tabsAluguelSalaoContent">
+            <div class="tab-pane fade show active" id="solicitacoes" role="tabpanel" aria-labelledby="solicitacoes-tab">
+                <div class="row g-3 align-items-center mb-3">
                     <div class="col-md-5">
                         <h2 class="h5 mb-1"><i class="bi bi-list-check me-2 text-primary"></i>Solicitações de aluguel</h2>
                         <p class="text-muted mb-0 small">Solicitações enviadas pela página pública do salão.</p>
@@ -95,15 +119,14 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card-body px-4 pb-4">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle" id="tabelaSolicitacoes">
                         <thead class="table-light">
                         <tr>
                             <th>Solicitante</th>
                             <th>Contato</th>
+                            <th>Plano</th>
                             <th>Data/Horário pretendido</th>
                             <th>Status</th>
                             <th>Solicitada em</th>
@@ -120,11 +143,13 @@
                                 </div>
                             </td>
                             <td>
-                                <div>
-                                    <a class="text-decoration-none" th:href="${'mailto:' + sol.email}" th:text="${sol.email}">email</a>
-                                </div>
-                                <div>
-                                    <a class="text-decoration-none" th:href="${'tel:' + sol.celular}" th:text="${sol.celular}">celular</a>
+                                <div><a class="text-decoration-none" th:href="${'mailto:' + sol.email}" th:text="${sol.email}">email</a></div>
+                                <div><a class="text-decoration-none" th:href="${'tel:' + sol.celular}" th:text="${sol.celular}">celular</a></div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold" th:text="${sol.nomePlanoApresentado != null ? sol.nomePlanoApresentado : (sol.planoAluguel != null ? sol.planoAluguel.nomePlano : '-')}">Plano</div>
+                                <div class="text-muted small" th:if="${sol.valorApresentado != null}">
+                                    R$ <span th:text="${#numbers.formatDecimal(sol.valorApresentado, 1, 'POINT', 2, 'COMMA')}">0,00</span>
                                 </div>
                             </td>
                             <td>
@@ -147,6 +172,8 @@
                                                  data-documento=${sol.tipoDocumento + ': ' + sol.documento},
                                                  data-email=${sol.email},
                                                  data-celular=${sol.celular},
+                                                 data-plano=${sol.nomePlanoApresentado != null ? sol.nomePlanoApresentado : (sol.planoAluguel != null ? sol.planoAluguel.nomePlano : '-')},
+                                                 data-valor=${sol.valorApresentado != null ? 'R$ ' + #numbers.formatDecimal(sol.valorApresentado, 1, 'POINT', 2, 'COMMA') : '-'},
                                                  data-data=${sol.dataDesejada != null ? #temporals.format(sol.dataDesejada, 'dd/MM/yyyy') : '-'},
                                                  data-horario=${sol.horaInicioDesejada != null and sol.horaFimDesejada != null ? #temporals.format(sol.horaInicioDesejada, 'HH:mm') + ' às ' + #temporals.format(sol.horaFimDesejada, 'HH:mm') : '-'},
                                                  data-motivo=${sol.motivoAluguel},
@@ -162,7 +189,7 @@
                             </td>
                         </tr>
                         <tr th:if="${solicitacoes == null or #lists.isEmpty(solicitacoes)}">
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-3 d-block mb-2"></i>Nenhuma solicitação recebida.
                             </td>
                         </tr>
@@ -170,11 +197,254 @@
                     </table>
                 </div>
             </div>
+
+            <div class="tab-pane fade" id="planos" role="tabpanel" aria-labelledby="planos-tab">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h2 class="h5 mb-1"><i class="bi bi-card-checklist me-2 text-primary"></i>Planos de aluguel</h2>
+                        <p class="text-muted mb-0 small">Cadastre valores, descrições e itens incluídos em cada plano.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPlano">
+                        <i class="bi bi-plus-circle me-2"></i>Novo plano
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Plano</th>
+                            <th>Valor</th>
+                            <th>Inclui</th>
+                            <th>Status</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="plano : ${planosAluguel}">
+                            <td>
+                                <div class="fw-semibold" th:text="${plano.nomePlano}">Plano</div>
+                                <div class="small text-muted" th:if="${plano.descricao != null and !#strings.isEmpty(plano.descricao)}" th:text="${plano.descricao}">Descrição</div>
+                            </td>
+                            <td class="fw-semibold text-primary">
+                                R$ <span th:text="${#numbers.formatDecimal(plano.valor, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                            </td>
+                            <td><div class="small" style="white-space: pre-line" th:text="${plano.itensInclusos}">Itens</div></td>
+                            <td>
+                                <span th:if="${plano.ativo}" class="badge bg-success">Ativo</span>
+                                <span th:if="${!plano.ativo}" class="badge bg-secondary">Inativo</span>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" title="Editar plano"
+                                        data-bs-toggle="modal" data-bs-target="#modalPlano"
+                                        th:attr="data-id=${plano.idPlano}, data-nome=${plano.nomePlano}, data-valor=${plano.valor}, data-itens=${plano.itensInclusos}, data-descricao=${plano.descricao}, data-ativo=${plano.ativo}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+
+                                <form class="d-inline" method="post" th:action="@{/aluguel-salao/gestao/planos/{id}/status(id=${plano.idPlano})}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="ativo" th:value="${!plano.ativo}">
+                                    <button type="submit" class="btn btn-sm me-1" th:classappend="${plano.ativo ? 'btn-outline-secondary' : 'btn-outline-success'}"
+                                            th:title="${plano.ativo ? 'Desativar plano' : 'Ativar plano'}">
+                                        <i th:class="${plano.ativo ? 'bi bi-eye-slash' : 'bi bi-eye'}"></i>
+                                    </button>
+                                </form>
+
+                                <form class="d-inline" method="post" th:action="@{/aluguel-salao/gestao/planos/{id}/excluir(id=${plano.idPlano})}" onsubmit="return confirm('Deseja excluir este plano? Se ele já estiver vinculado a solicitações, prefira desativá-lo.');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir plano">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${planosAluguel == null or #lists.isEmpty(planosAluguel)}">
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-card-list fs-3 d-block mb-2"></i>Nenhum plano cadastrado.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="fotos" role="tabpanel" aria-labelledby="fotos-tab">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h2 class="h5 mb-1"><i class="bi bi-images me-2 text-primary"></i>Fotos do salão</h2>
+                        <p class="text-muted mb-0 small">Adicione, edite e escolha quais fotos aparecem na página pública.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalFoto">
+                        <i class="bi bi-plus-circle me-2"></i>Nova foto
+                    </button>
+                </div>
+
+                <div class="row g-4" th:if="${fotosSalao != null and !#lists.isEmpty(fotosSalao)}">
+                    <div class="col-md-6 col-lg-4" th:each="foto : ${fotosSalao}">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                            <img th:src="@{'/' + ${foto.caminhoArquivo}}" class="card-img-top" style="height: 210px; object-fit: cover;" alt="Foto do salão">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <h3 class="h6 mb-0" th:text="${foto.titulo != null and !#strings.isEmpty(foto.titulo) ? foto.titulo : 'Foto do salão'}">Foto</h3>
+                                    <span th:if="${foto.fotoPrincipal}" class="badge bg-primary">Principal</span>
+                                </div>
+                                <p class="small text-muted" th:if="${foto.descricao != null and !#strings.isEmpty(foto.descricao)}" th:text="${foto.descricao}">Descrição</p>
+                                <div class="small text-muted mb-3">
+                                    Ordem: <span th:text="${foto.ordemExibicao}">0</span> ·
+                                    <span th:if="${foto.ativo}" class="text-success">Ativa</span>
+                                    <span th:if="${!foto.ativo}" class="text-secondary">Inativa</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalFoto"
+                                            th:attr="data-id=${foto.idFoto}, data-titulo=${foto.titulo}, data-descricao=${foto.descricao}, data-ordem=${foto.ordemExibicao}, data-principal=${foto.fotoPrincipal}, data-ativo=${foto.ativo}">
+                                        <i class="bi bi-pencil-square me-1"></i>Editar
+                                    </button>
+
+                                    <form method="post" th:action="@{/aluguel-salao/gestao/fotos/{id}/principal(id=${foto.idFoto})}" th:if="${!foto.fotoPrincipal}">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-star me-1"></i>Principal
+                                        </button>
+                                    </form>
+
+                                    <form method="post" th:action="@{/aluguel-salao/gestao/fotos/{id}/status(id=${foto.idFoto})}">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="ativo" th:value="${!foto.ativo}">
+                                        <button type="submit" class="btn btn-sm" th:classappend="${foto.ativo ? 'btn-outline-secondary' : 'btn-outline-success'}">
+                                            <i th:class="${foto.ativo ? 'bi bi-eye-slash' : 'bi bi-eye'}"></i>
+                                        </button>
+                                    </form>
+
+                                    <form method="post" th:action="@{/aluguel-salao/gestao/fotos/{id}/excluir(id=${foto.idFoto})}" onsubmit="return confirm('Deseja excluir esta foto?');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${fotosSalao == null or #lists.isEmpty(fotosSalao)}" class="text-center text-muted py-5">
+                    <i class="bi bi-images fs-1 d-block mb-2"></i>
+                    Nenhuma foto cadastrada.
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="calendario" role="tabpanel" aria-labelledby="calendario-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <button type="button" class="btn btn-outline-primary" id="calMesAnterior"><i class="bi bi-chevron-left"></i></button>
+                    <h2 class="h5 mb-0" id="calTituloMes">Calendário</h2>
+                    <button type="button" class="btn btn-outline-primary" id="calProximoMes"><i class="bi bi-chevron-right"></i></button>
+                </div>
+                <div id="calendarioSalao" class="table-responsive"></div>
+                <p class="small text-muted mt-3 mb-0">
+                    Os dias em vermelho possuem pelo menos uma solicitação marcada como <strong>Alugado</strong>.
+                </p>
+            </div>
         </div>
     </div>
 </main>
 
-<!-- Modal: Status da Solicitação -->
+<div class="modal fade" id="modalPlano" tabindex="-1" aria-labelledby="modalPlanoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formPlano" method="post" th:action="@{/aluguel-salao/gestao/planos/salvar}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" id="idPlano" name="idPlano">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPlanoLabel">Novo plano de aluguel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="nomePlano" class="form-label">Nome do plano</label>
+                            <input type="text" id="nomePlano" name="nomePlano" class="form-control" required maxlength="120" placeholder="Ex.: Plano básico, Plano completo...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="valorPlano" class="form-label">Valor</label>
+                            <input type="number" id="valorPlano" name="valor" class="form-control" required min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="col-12">
+                            <label for="descricaoPlano" class="form-label">Descrição</label>
+                            <textarea id="descricaoPlano" name="descricao" class="form-control" rows="3" placeholder="Descreva quando esse plano é indicado."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="itensInclusos" class="form-label">O que vem incluído</label>
+                            <textarea id="itensInclusos" name="itensInclusos" class="form-control" rows="5" required placeholder="Ex.: Uso do salão por 4 horas&#10;Mesas e cadeiras&#10;Cozinha..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="ativoPlano" name="ativo" value="true" checked>
+                                <label class="form-check-label" for="ativoPlano">Plano ativo na página pública</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>Salvar plano</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFoto" tabindex="-1" aria-labelledby="modalFotoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formFoto" method="post" th:action="@{/aluguel-salao/gestao/fotos/salvar}" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" id="idFoto" name="idFoto">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalFotoLabel">Nova foto do salão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="tituloFoto" class="form-label">Título</label>
+                            <input type="text" id="tituloFoto" name="titulo" class="form-control" maxlength="120" placeholder="Ex.: Salão principal">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="ordemFoto" class="form-label">Ordem</label>
+                            <input type="number" id="ordemFoto" name="ordemExibicao" class="form-control" value="0" min="0">
+                        </div>
+                        <div class="col-12">
+                            <label for="arquivoFoto" class="form-label">Imagem</label>
+                            <input type="file" id="arquivoFoto" name="arquivo" class="form-control" accept="image/jpeg,image/png,image/webp">
+                            <div class="form-text">Para editar apenas os textos, deixe esse campo em branco. Para nova foto, a imagem é obrigatória.</div>
+                        </div>
+                        <div class="col-12">
+                            <label for="descricaoFoto" class="form-label">Descrição</label>
+                            <textarea id="descricaoFoto" name="descricao" class="form-control" rows="3" placeholder="Descrição opcional da foto."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fotoPrincipal" name="fotoPrincipal" value="true">
+                                <label class="form-check-label" for="fotoPrincipal">Definir como foto principal</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="ativoFoto" name="ativo" value="true" checked>
+                                <label class="form-check-label" for="ativoFoto">Exibir na página pública</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>Salvar foto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalStatusSolicitacao" tabindex="-1" aria-labelledby="modalStatusSolicitacaoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -203,16 +473,13 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check2-circle me-2"></i>Atualizar
-                    </button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>Atualizar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal: Detalhes da Solicitação -->
 <div class="modal fade" id="modalDetalhesSolicitacao" tabindex="-1" aria-labelledby="modalDetalhesSolicitacaoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -224,25 +491,20 @@
                 <dl class="row mb-0">
                     <dt class="col-sm-3">Responsável</dt>
                     <dd class="col-sm-9" id="detalheNome">-</dd>
-
                     <dt class="col-sm-3">Documento</dt>
                     <dd class="col-sm-9" id="detalheDocumento">-</dd>
-
                     <dt class="col-sm-3">E-mail</dt>
                     <dd class="col-sm-9" id="detalheEmail">-</dd>
-
                     <dt class="col-sm-3">Celular</dt>
                     <dd class="col-sm-9" id="detalheCelular">-</dd>
-
+                    <dt class="col-sm-3">Plano</dt>
+                    <dd class="col-sm-9"><span id="detalhePlano">-</span> <span id="detalheValor" class="text-muted"></span></dd>
                     <dt class="col-sm-3">Data pretendida</dt>
                     <dd class="col-sm-9" id="detalheData">-</dd>
-
                     <dt class="col-sm-3">Horário pretendido</dt>
                     <dd class="col-sm-9" id="detalheHorario">-</dd>
-
                     <dt class="col-sm-3">Motivo</dt>
                     <dd class="col-sm-9" id="detalheMotivo">-</dd>
-
                     <dt class="col-sm-3">Observação</dt>
                     <dd class="col-sm-9" id="detalheObservacao">-</dd>
                 </dl>
@@ -257,11 +519,12 @@
 <footer th:replace="~{fragments/base :: rodape}"></footer>
 <th:block th:replace="~{fragments/base :: scriptsPadrao}"></th:block>
 
-<script>
+<script th:inline="javascript">
     function filtrarTabela(inputId, tabelaId) {
-        const termo = document.getElementById(inputId).value.toLowerCase();
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const termo = input.value.toLowerCase();
         const linhas = document.querySelectorAll('#' + tabelaId + ' tbody tr');
-
         linhas.forEach(function (linha) {
             const texto = linha.innerText.toLowerCase();
             linha.style.display = texto.includes(termo) ? '' : 'none';
@@ -269,6 +532,45 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabButton = document.querySelector('[data-bs-target="' + hash + '"]');
+            if (tabButton && window.bootstrap) {
+                new bootstrap.Tab(tabButton).show();
+            }
+        }
+
+        const modalPlano = document.getElementById('modalPlano');
+        if (modalPlano) {
+            modalPlano.addEventListener('show.bs.modal', function (event) {
+                const botao = event.relatedTarget;
+                const editar = botao && botao.getAttribute('data-id');
+                document.getElementById('modalPlanoLabel').textContent = editar ? 'Editar plano de aluguel' : 'Novo plano de aluguel';
+                document.getElementById('idPlano').value = editar ? botao.getAttribute('data-id') : '';
+                document.getElementById('nomePlano').value = editar ? (botao.getAttribute('data-nome') || '') : '';
+                document.getElementById('valorPlano').value = editar ? (botao.getAttribute('data-valor') || '') : '';
+                document.getElementById('descricaoPlano').value = editar ? (botao.getAttribute('data-descricao') || '') : '';
+                document.getElementById('itensInclusos').value = editar ? (botao.getAttribute('data-itens') || '') : '';
+                document.getElementById('ativoPlano').checked = editar ? (botao.getAttribute('data-ativo') === 'true') : true;
+            });
+        }
+
+        const modalFoto = document.getElementById('modalFoto');
+        if (modalFoto) {
+            modalFoto.addEventListener('show.bs.modal', function (event) {
+                const botao = event.relatedTarget;
+                const editar = botao && botao.getAttribute('data-id');
+                document.getElementById('modalFotoLabel').textContent = editar ? 'Editar foto do salão' : 'Nova foto do salão';
+                document.getElementById('idFoto').value = editar ? botao.getAttribute('data-id') : '';
+                document.getElementById('tituloFoto').value = editar ? (botao.getAttribute('data-titulo') || '') : '';
+                document.getElementById('descricaoFoto').value = editar ? (botao.getAttribute('data-descricao') || '') : '';
+                document.getElementById('ordemFoto').value = editar ? (botao.getAttribute('data-ordem') || '0') : '0';
+                document.getElementById('fotoPrincipal').checked = editar ? (botao.getAttribute('data-principal') === 'true') : false;
+                document.getElementById('ativoFoto').checked = editar ? (botao.getAttribute('data-ativo') === 'true') : true;
+                document.getElementById('arquivoFoto').value = '';
+            });
+        }
+
         const modalStatus = document.getElementById('modalStatusSolicitacao');
         if (modalStatus) {
             modalStatus.addEventListener('show.bs.modal', function (event) {
@@ -276,7 +578,6 @@
                 const id = botao.getAttribute('data-id');
                 const status = botao.getAttribute('data-status') || 'PENDENTE';
                 const observacao = botao.getAttribute('data-observacao') || '';
-
                 document.getElementById('formStatusSolicitacao').action = '/aluguel-salao/gestao/solicitacoes/' + id + '/status';
                 document.getElementById('statusSolicitacao').value = status;
                 document.getElementById('observacaoSecretaria').value = observacao;
@@ -291,12 +592,72 @@
                 document.getElementById('detalheDocumento').textContent = botao.getAttribute('data-documento') || '-';
                 document.getElementById('detalheEmail').textContent = botao.getAttribute('data-email') || '-';
                 document.getElementById('detalheCelular').textContent = botao.getAttribute('data-celular') || '-';
+                document.getElementById('detalhePlano').textContent = botao.getAttribute('data-plano') || '-';
+                document.getElementById('detalheValor').textContent = botao.getAttribute('data-valor') || '';
                 document.getElementById('detalheData').textContent = botao.getAttribute('data-data') || '-';
                 document.getElementById('detalheHorario').textContent = botao.getAttribute('data-horario') || '-';
                 document.getElementById('detalheMotivo').textContent = botao.getAttribute('data-motivo') || '-';
                 document.getElementById('detalheObservacao').textContent = botao.getAttribute('data-observacao') || '-';
             });
         }
+
+        const datasOcupadas = new Set(/*[[${datasOcupadas}]]*/ []);
+        const nomesMeses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+        const nomesDias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const calContainer = document.getElementById('calendarioSalao');
+        const calTitulo = document.getElementById('calTituloMes');
+        const btnAnterior = document.getElementById('calMesAnterior');
+        const btnProximo = document.getElementById('calProximoMes');
+        let mesAtual = new Date();
+        mesAtual.setDate(1);
+
+        function dataHojeISO() {
+            const hoje = new Date();
+            return hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' + String(hoje.getDate()).padStart(2, '0');
+        }
+
+        function isoData(ano, mes, dia) {
+            return ano + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
+        }
+
+        function renderizarCalendario() {
+            if (!calContainer || !calTitulo) return;
+            const ano = mesAtual.getFullYear();
+            const mes = mesAtual.getMonth();
+            const primeiroDia = new Date(ano, mes, 1).getDay();
+            const totalDias = new Date(ano, mes + 1, 0).getDate();
+            const hojeISO = dataHojeISO();
+            calTitulo.textContent = nomesMeses[mes].charAt(0).toUpperCase() + nomesMeses[mes].slice(1) + ' de ' + ano;
+
+            let html = '<table class="table table-bordered text-center align-middle mb-0">';
+            html += '<thead><tr>' + nomesDias.map(d => '<th class="small text-muted">' + d + '</th>').join('') + '</tr></thead><tbody>';
+            let dia = 1;
+            for (let semana = 0; semana < 6; semana++) {
+                html += '<tr>';
+                for (let coluna = 0; coluna < 7; coluna++) {
+                    if ((semana === 0 && coluna < primeiroDia) || dia > totalDias) {
+                        html += '<td class="bg-light text-muted" style="height: 72px;"></td>';
+                    } else {
+                        const dataISO = isoData(ano, mes, dia);
+                        const ocupado = datasOcupadas.has(dataISO);
+                        const hoje = dataISO === hojeISO;
+                        let classe = ocupado ? 'table-danger fw-bold' : (hoje ? 'table-success fw-bold' : '');
+                        html += '<td class="' + classe + '" style="height: 72px;">';
+                        html += '<div>' + dia + '</div>';
+                        if (ocupado) html += '<small class="badge bg-danger">Ocupado</small>';
+                        html += '</td>';
+                        dia++;
+                    }
+                }
+                html += '</tr>';
+                if (dia > totalDias) break;
+            }
+            html += '</tbody></table>';
+            calContainer.innerHTML = html;
+        }
+        if (btnAnterior) btnAnterior.addEventListener('click', function () { mesAtual.setMonth(mesAtual.getMonth() - 1); renderizarCalendario(); });
+        if (btnProximo) btnProximo.addEventListener('click', function () { mesAtual.setMonth(mesAtual.getMonth() + 1); renderizarCalendario(); });
+        renderizarCalendario();
     });
 </script>
 

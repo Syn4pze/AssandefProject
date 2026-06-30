@@ -18,6 +18,16 @@ public interface SolicitacaoAluguelSalaoRepository extends JpaRepository<Solicit
 
     List<SolicitacaoAluguelSalao> findByStatusOrderByDataSolicitacaoDesc(StatusSolicitacaoAluguelSalao status);
 
+    List<SolicitacaoAluguelSalao> findByStatusOrderByDataDesejadaAscHoraInicioDesejadaAsc(StatusSolicitacaoAluguelSalao status);
+
+    @Query("""
+            select distinct s.dataDesejada
+            from SolicitacaoAluguelSalao s
+            where s.status = :status
+            order by s.dataDesejada asc
+            """)
+    List<LocalDate> findDatasByStatus(@Param("status") StatusSolicitacaoAluguelSalao status);
+
     @Query("""
             select count(s) > 0
             from SolicitacaoAluguelSalao s

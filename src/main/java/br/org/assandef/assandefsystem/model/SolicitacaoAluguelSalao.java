@@ -51,6 +51,13 @@ public class SolicitacaoAluguelSalao {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_plano_aluguel")
+    private PlanoAluguelSalao planoAluguel;
+
+    @Column(name = "nome_plano_apresentado", length = 120)
+    private String nomePlanoApresentado;
+
     @NotNull(message = "Data desejada é obrigatória")
     @Column(name = "data_desejada", nullable = false)
     private LocalDate dataDesejada;

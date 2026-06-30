@@ -71,6 +71,7 @@ public class SecurityConfig {
                                 "/publicacoes/**",
                                 "/aluguel-salao",
                                 "/aluguel-salao/",
+                                "/aluguel-salao/datas-ocupadas",
                                 "/images/**",
                                 "/uploads/**",
                                 "/error",
