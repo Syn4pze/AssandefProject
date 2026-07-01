@@ -7,28 +7,24 @@
 
 <main class="salao-page">
 
-    <!-- HERO -->
     <section class="salao-hero">
         <div class="container">
             <div class="row align-items-center gy-5">
                 <div class="col-lg-7 text-center text-lg-start">
                     <span class="section-kicker">Espaço para eventos</span>
                     <h1 class="salao-hero-title">Aluguel do Salão</h1>
-                    <p class="salao-hero-frase">
-                        Realize seu evento e contribua com as ações sociais da ASSANDEF.
-                    </p>
+                    <p class="salao-hero-frase">Realize seu evento e contribua com as ações sociais da ASSANDEF.</p>
                     <p class="salao-hero-text">
-                        Informe seus dados, escolha a data e o horário pretendidos para o aluguel do salão e envie sua solicitação.
-                        A equipe da ASSANDEF verificará a disponibilidade e entrará em contato pelo telefone ou e-mail informado
-                        para combinar os detalhes e a confirmação do pagamento.
+                        Consulte os planos disponíveis, verifique no calendário os dias já ocupados e envie sua solicitação.
+                        A equipe da ASSANDEF entrará em contato para confirmar a disponibilidade, esclarecer detalhes e dar continuidade ao atendimento.
                     </p>
 
                     <div class="sobre-hero-actions">
                         <a href="#solicitar" class="btn btn-primary btn-lg">
                             <i class="bi bi-calendar-check me-2"></i>Solicitar locação
                         </a>
-                        <a href="#informacoes" class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-info-circle me-2"></i>Como funciona
+                        <a href="#calendario" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-calendar3 me-2"></i>Ver calendário
                         </a>
                     </div>
                 </div>
@@ -41,16 +37,16 @@
                         <h2>Como funciona?</h2>
                         <div class="salao-info-list">
                             <div class="salao-info-item">
-                                <i class="bi bi-calendar2-week"></i>
-                                <span>Você informa a data e o horário pretendidos.</span>
+                                <i class="bi bi-card-checklist"></i>
+                                <span>Você escolhe um plano de aluguel.</span>
                             </div>
                             <div class="salao-info-item">
-                                <i class="bi bi-send-check"></i>
-                                <span>A solicitação é enviada para análise da Secretaria.</span>
+                                <i class="bi bi-calendar2-week"></i>
+                                <span>Informa a data e o horário pretendidos.</span>
                             </div>
                             <div class="salao-info-item">
                                 <i class="bi bi-telephone-outbound"></i>
-                                <span>A equipe entra em contato para confirmar disponibilidade e pagamento.</span>
+                                <span>A instituição entra em contato para confirmar os detalhes.</span>
                             </div>
                         </div>
                     </div>
@@ -59,18 +55,17 @@
         </div>
     </section>
 
-    <!-- ATALHOS -->
     <section class="sobre-atalhos">
         <div class="container">
             <nav class="sobre-atalhos-nav" aria-label="Navegação da página de aluguel do salão">
-                <a href="#informacoes">Informações</a>
+                <a href="#planos">Planos</a>
+                <a href="#galeria">Fotos</a>
+                <a href="#calendario">Calendário</a>
                 <a href="#solicitar">Formulário</a>
-                <a href="#contato">Contato</a>
             </nav>
         </div>
     </section>
 
-    <!-- FLASH MESSAGES -->
     <section class="container mt-4" th:if="${(mensagem != null and !#strings.isEmpty(mensagem)) or (erro != null and !#strings.isEmpty(erro))}">
         <div class="alert alert-success alert-dismissible fade show" role="alert"
              th:if="${mensagem != null and !#strings.isEmpty(mensagem)}">
@@ -86,7 +81,6 @@
         </div>
     </section>
 
-    <!-- INFORMAÇÕES -->
     <section id="informacoes" class="sobre-section">
         <div class="container">
             <div class="section-heading text-center">
@@ -95,23 +89,23 @@
                 <p>
                     A locação do salão auxilia a ASSANDEF na arrecadação de recursos para manutenção de suas atividades.
                     O pedido enviado pelo site não confirma automaticamente a reserva: ele será analisado pela Secretaria,
-                    que entrará em contato pelo celular ou e-mail informado caso a data e o horário solicitados estejam disponíveis.
+                    que entrará em contato pelo celular ou e-mail informado.
                 </p>
             </div>
 
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="salao-feature-card h-100">
-                        <i class="bi bi-calendar-event"></i>
-                        <h3>Data pretendida</h3>
-                        <p>O solicitante informa diretamente a data e o período em que deseja utilizar o salão.</p>
+                        <i class="bi bi-card-list"></i>
+                        <h3>Planos de aluguel</h3>
+                        <p>Consulte os valores, descrições e itens incluídos em cada opção de locação.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="salao-feature-card h-100">
-                        <i class="bi bi-ui-checks-grid"></i>
-                        <h3>Solicitação online</h3>
-                        <p>O formulário reúne os dados do responsável, contato e finalidade do evento para análise da equipe.</p>
+                        <i class="bi bi-calendar-x"></i>
+                        <h3>Dias ocupados</h3>
+                        <p>O calendário público destaca as datas que já possuem reserva confirmada.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -125,15 +119,63 @@
         </div>
     </section>
 
-    <!-- GALERIA / ESPAÇO VISUAL -->
-    <section class="sobre-section sobre-section-soft">
+    <section id="planos" class="sobre-section sobre-section-soft">
+        <div class="container">
+            <div class="section-heading text-center">
+                <span class="section-kicker">Valores e opções</span>
+                <h2>Planos de aluguel</h2>
+                <p>Escolha o plano que melhor se encaixa no tipo de evento desejado.</p>
+            </div>
+
+            <div th:if="${planosAluguel == null or #lists.isEmpty(planosAluguel)}" class="alert alert-info rounded-4">
+                <i class="bi bi-info-circle me-2"></i>
+                Os planos de aluguel ainda não foram cadastrados. Entre em contato com a ASSANDEF para mais informações.
+            </div>
+
+            <div class="row g-4" th:if="${planosAluguel != null and !#lists.isEmpty(planosAluguel)}">
+                <div class="col-md-6 col-lg-4" th:each="plano : ${planosAluguel}">
+                    <div class="card h-100 border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                <h3 class="h5 mb-0" th:text="${plano.nomePlano}">Plano</h3>
+                                <span class="badge bg-primary-subtle text-primary rounded-pill">Disponível</span>
+                            </div>
+                            <div class="display-6 fw-bold text-primary mb-3">
+                                R$ <span th:text="${#numbers.formatDecimal(plano.valor, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                            </div>
+                            <p class="text-muted" th:if="${plano.descricao != null and !#strings.isEmpty(plano.descricao)}" th:text="${plano.descricao}">
+                                Descrição do plano.
+                            </p>
+                            <div class="small text-muted mb-2">Inclui:</div>
+                            <div class="small" style="white-space: pre-line" th:text="${plano.itensInclusos}">Itens incluídos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeria" class="sobre-section">
         <div class="container">
             <div class="section-heading text-center">
                 <span class="section-kicker">Espaço da ASSANDEF</span>
                 <h2>Conheça o salão</h2>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4" th:if="${fotosSalao != null and !#lists.isEmpty(fotosSalao)}">
+                <div class="col-md-6 col-lg-4" th:each="foto : ${fotosSalao}">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <img th:src="@{'/' + ${foto.caminhoArquivo}}" class="card-img-top" style="height: 240px; object-fit: cover;"
+                             th:alt="${foto.titulo != null and !#strings.isEmpty(foto.titulo) ? foto.titulo : 'Foto do salão'}">
+                        <div class="card-body" th:if="${(foto.titulo != null and !#strings.isEmpty(foto.titulo)) or (foto.descricao != null and !#strings.isEmpty(foto.descricao))}">
+                            <h3 class="h6" th:if="${foto.titulo != null and !#strings.isEmpty(foto.titulo)}" th:text="${foto.titulo}">Foto do salão</h3>
+                            <p class="small text-muted mb-0" th:if="${foto.descricao != null and !#strings.isEmpty(foto.descricao)}" th:text="${foto.descricao}">Descrição</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4" th:if="${fotosSalao == null or #lists.isEmpty(fotosSalao)}">
                 <div class="col-md-4">
                     <div class="salao-photo-placeholder">
                         <i class="bi bi-image"></i>
@@ -156,8 +198,36 @@
         </div>
     </section>
 
-    <!-- FORMULÁRIO -->
-    <section id="solicitar" class="sobre-section sobre-section-soft">
+    <section id="calendario" class="sobre-section sobre-section-soft">
+        <div class="container">
+            <div class="section-heading text-center">
+                <span class="section-kicker">Disponibilidade</span>
+                <h2>Calendário do salão</h2>
+                <p>Os dias destacados estão ocupados por reservas já confirmadas pela equipe da ASSANDEF.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mx-auto" style="max-width: 820px;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button type="button" class="btn btn-outline-primary" id="calMesAnterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <h3 class="h5 mb-0 text-center" id="calTituloMes">Mês</h3>
+                        <button type="button" class="btn btn-outline-primary" id="calProximoMes">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div id="calendarioSalao" class="table-responsive"></div>
+                    <div class="d-flex gap-3 align-items-center mt-3 small text-muted flex-wrap">
+                        <span><span class="d-inline-block rounded-circle bg-danger" style="width: 12px; height: 12px;"></span> Ocupado</span>
+                        <span><span class="d-inline-block rounded-circle bg-success" style="width: 12px; height: 12px;"></span> Dia atual</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="solicitar" class="sobre-section">
         <div class="container">
             <div class="row g-5 align-items-start">
                 <div class="col-lg-5">
@@ -165,9 +235,15 @@
                         <span class="section-kicker">Solicitação</span>
                         <h2>Envie seu pedido de locação</h2>
                         <p>
-                            Preencha os dados do responsável e informe a data e o horário desejados. A solicitação será registrada
-                            como pendente e analisada pela equipe da ASSANDEF.
+                            Preencha os dados do responsável, escolha um plano e informe a data e o horário desejados.
+                            A solicitação será registrada como pendente e analisada pela equipe da ASSANDEF.
                         </p>
+
+                        <div class="salao-valor-box mb-3" id="planoSelecionadoBox">
+                            <span>Plano selecionado</span>
+                            <strong id="planoSelecionadoTexto">Selecione um plano</strong>
+                            <small id="planoSelecionadoDetalhe">O valor será confirmado pela Secretaria.</small>
+                        </div>
 
                         <div class="salao-valor-box" id="periodoSolicitadoBox">
                             <span>Período pretendido</span>
@@ -191,9 +267,7 @@
                                     <label for="tipoDocumento" class="form-label">Tipo</label>
                                     <select id="tipoDocumento" name="tipoDocumento" class="form-select form-select-lg" required>
                                         <option value="">Selecione</option>
-                                        <option th:each="tipo : ${tiposDocumento}"
-                                                th:value="${tipo}"
-                                                th:text="${tipo}">CPF</option>
+                                        <option th:each="tipo : ${tiposDocumento}" th:value="${tipo}" th:text="${tipo}">CPF</option>
                                     </select>
                                 </div>
 
@@ -215,6 +289,19 @@
                                     <label for="email" class="form-label">E-mail</label>
                                     <input type="email" id="email" name="email" class="form-control form-control-lg"
                                            required maxlength="255" placeholder="seuemail@exemplo.com">
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="idPlanoAluguel" class="form-label">Plano de aluguel</label>
+                                    <select id="idPlanoAluguel" name="idPlanoAluguel" class="form-select form-select-lg" required>
+                                        <option value="">Selecione o plano desejado</option>
+                                        <option th:each="plano : ${planosAluguel}"
+                                                th:value="${plano.idPlano}"
+                                                th:text="${plano.nomePlano + ' - R$ ' + #numbers.formatDecimal(plano.valor, 1, 'POINT', 2, 'COMMA')}"
+                                                th:attr="data-nome=${plano.nomePlano}, data-valor=${#numbers.formatDecimal(plano.valor, 1, 'POINT', 2, 'COMMA')}, data-descricao=${plano.descricao}, data-itens=${plano.itensInclusos}">
+                                            Plano
+                                        </option>
+                                    </select>
                                 </div>
 
                                 <div class="col-md-4">
@@ -247,7 +334,7 @@
                                 </div>
 
                                 <div class="col-12 d-grid d-md-flex justify-content-md-end gap-2">
-                                    <button type="submit" class="btn btn-primary btn-lg">
+                                    <button type="submit" class="btn btn-primary btn-lg" th:disabled="${planosAluguel == null or #lists.isEmpty(planosAluguel)}">
                                         <i class="bi bi-send-check me-2"></i>Enviar solicitação
                                     </button>
                                 </div>
@@ -259,34 +346,14 @@
         </div>
     </section>
 
-    <!-- CONTATO -->
-    <section id="contato" class="sobre-cta">
-        <div class="container">
-            <div class="sobre-cta-card text-center">
-                <span class="section-kicker">Dúvidas?</span>
-                <h2>Entre em contato com a ASSANDEF</h2>
-                <p>
-                    Caso precise de mais informações antes de enviar a solicitação, entre em contato diretamente com a instituição.
-                </p>
-                <div class="sobre-cta-actions">
-                    <a href="mailto:assandef@assandef.com.br" class="btn btn-light btn-lg">
-                        <i class="bi bi-envelope-fill me-2"></i>Enviar e-mail
-                    </a>
-                    <a href="tel:+555532421712" class="btn btn-outline-light btn-lg">
-                        <i class="bi bi-telephone-fill me-2"></i>Ligar para ASSANDEF
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
 </main>
 
 <footer th:replace="~{fragments/base :: rodape}"></footer>
 <th:block th:replace="~{fragments/base :: scriptsPadrao}"></th:block>
 
-<script>
+<script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {
+        const datasOcupadas = new Set(/*[[${datasOcupadas}]]*/ []);
         const tipoDocumento = document.getElementById('tipoDocumento');
         const documento = document.getElementById('documento');
         const celular = document.getElementById('celular');
@@ -296,6 +363,9 @@
         const periodoTexto = document.getElementById('periodoSolicitadoTexto');
         const periodoDetalhe = document.getElementById('periodoSolicitadoDetalhe');
         const form = document.getElementById('formSolicitacaoSalao');
+        const selectPlano = document.getElementById('idPlanoAluguel');
+        const planoTexto = document.getElementById('planoSelecionadoTexto');
+        const planoDetalhe = document.getElementById('planoSelecionadoDetalhe');
 
         function somenteNumeros(valor) {
             return (valor || '').replace(/\D/g, '');
@@ -366,15 +436,23 @@
             }
         }
 
+        function atualizarResumoPlano() {
+            const opt = selectPlano.options[selectPlano.selectedIndex];
+            if (opt && opt.value) {
+                planoTexto.textContent = (opt.dataset.nome || 'Plano selecionado') + ' - R$ ' + (opt.dataset.valor || '0,00');
+                planoDetalhe.textContent = opt.dataset.descricao || opt.dataset.itens || 'Detalhes do plano selecionado.';
+            } else {
+                planoTexto.textContent = 'Selecione um plano';
+                planoDetalhe.textContent = 'O valor será confirmado pela Secretaria.';
+            }
+        }
+
+        if (selectPlano) selectPlano.addEventListener('change', atualizarResumoPlano);
         if (tipoDocumento && documento) {
             tipoDocumento.addEventListener('change', mascararDocumento);
             documento.addEventListener('input', mascararDocumento);
         }
-
-        if (celular) {
-            celular.addEventListener('input', mascararCelular);
-        }
-
+        if (celular) celular.addEventListener('input', mascararCelular);
         [dataDesejada, horaInicio, horaFim].forEach(function (campo) {
             if (campo) campo.addEventListener('change', atualizarResumoPeriodo);
         });
@@ -386,6 +464,14 @@
                     alert('A data desejada não pode ser anterior à data atual.');
                     dataDesejada.focus();
                     return;
+                }
+
+                if (dataDesejada.value && datasOcupadas.has(dataDesejada.value)) {
+                    if (!confirm('A data selecionada aparece como ocupada no calendário. Deseja enviar a solicitação mesmo assim para análise da Secretaria?')) {
+                        event.preventDefault();
+                        dataDesejada.focus();
+                        return;
+                    }
                 }
 
                 if (horaInicio.value && horaFim.value && horaFim.value <= horaInicio.value) {
@@ -416,6 +502,68 @@
                 celular.value = somenteNumeros(celular.value);
             });
         }
+
+        const nomesMeses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+        const nomesDias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const calContainer = document.getElementById('calendarioSalao');
+        const calTitulo = document.getElementById('calTituloMes');
+        const btnAnterior = document.getElementById('calMesAnterior');
+        const btnProximo = document.getElementById('calProximoMes');
+        let mesAtual = new Date();
+        mesAtual.setDate(1);
+
+        function isoData(ano, mes, dia) {
+            return ano + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
+        }
+
+        function renderizarCalendario() {
+            if (!calContainer || !calTitulo) return;
+
+            const ano = mesAtual.getFullYear();
+            const mes = mesAtual.getMonth();
+            const primeiroDia = new Date(ano, mes, 1).getDay();
+            const totalDias = new Date(ano, mes + 1, 0).getDate();
+            const hojeISO = dataHojeISO();
+
+            calTitulo.textContent = nomesMeses[mes].charAt(0).toUpperCase() + nomesMeses[mes].slice(1) + ' de ' + ano;
+
+            let html = '<table class="table table-bordered text-center align-middle mb-0">';
+            html += '<thead><tr>' + nomesDias.map(d => '<th class="small text-muted">' + d + '</th>').join('') + '</tr></thead><tbody>';
+
+            let dia = 1;
+            for (let semana = 0; semana < 6; semana++) {
+                html += '<tr>';
+                for (let coluna = 0; coluna < 7; coluna++) {
+                    if ((semana === 0 && coluna < primeiroDia) || dia > totalDias) {
+                        html += '<td class="bg-light text-muted" style="height: 72px;"></td>';
+                    } else {
+                        const dataISO = isoData(ano, mes, dia);
+                        const ocupado = datasOcupadas.has(dataISO);
+                        const hoje = dataISO === hojeISO;
+                        let classe = ocupado ? 'table-danger fw-bold' : (hoje ? 'table-success fw-bold' : '');
+                        html += '<td class="' + classe + '" style="height: 72px;">';
+                        html += '<div>' + dia + '</div>';
+                        if (ocupado) html += '<small class="badge bg-danger">Ocupado</small>';
+                        html += '</td>';
+                        dia++;
+                    }
+                }
+                html += '</tr>';
+                if (dia > totalDias) break;
+            }
+            html += '</tbody></table>';
+            calContainer.innerHTML = html;
+        }
+
+        if (btnAnterior) btnAnterior.addEventListener('click', function () {
+            mesAtual.setMonth(mesAtual.getMonth() - 1);
+            renderizarCalendario();
+        });
+        if (btnProximo) btnProximo.addEventListener('click', function () {
+            mesAtual.setMonth(mesAtual.getMonth() + 1);
+            renderizarCalendario();
+        });
+        renderizarCalendario();
     });
 </script>
 

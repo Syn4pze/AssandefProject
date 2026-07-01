@@ -400,8 +400,52 @@ CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB COMMENT='Tokens usados no fluxo de recuperação de senha.';
 
+
 -- =================================================================
--- 19. SOLICITAÇÕES DE ALUGUEL DO SALÃO
+-- 19. PLANOS DE ALUGUEL DO SALÃO
+-- Armazena os planos de locação cadastrados pela Secretaria.
+-- Entidade: PlanoAluguelSalao.java
+-- =================================================================
+CREATE TABLE IF NOT EXISTS `planos_aluguel_salao` (
+  `id_plano` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador único do plano de aluguel.',
+  `nome_plano` VARCHAR(120) NOT NULL COMMENT 'Nome do plano exibido na página pública.',
+  `valor` DECIMAL(10,2) NOT NULL COMMENT 'Valor do plano de aluguel.',
+  `itens_inclusos` TEXT NOT NULL COMMENT 'Itens incluídos no plano.',
+  `descricao` TEXT NULL COMMENT 'Descrição detalhada do plano.',
+  `ativo` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Indica se o plano aparece na página pública.',
+  `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Data de criação do plano.',
+  `data_atualizacao` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Data de atualização do plano.',
+  PRIMARY KEY (`id_plano`),
+  INDEX `idx_planos_aluguel_ativo` (`ativo`),
+  CONSTRAINT `chk_planos_aluguel_valor` CHECK (`valor` >= 0)
+) ENGINE=InnoDB COMMENT='Planos de aluguel do salão da ASSANDEF.';
+
+-- =================================================================
+-- 20. FOTOS DO SALÃO
+-- Armazena as fotos cadastradas pela Secretaria para exibição pública.
+-- Entidade: FotoSalao.java
+-- =================================================================
+CREATE TABLE IF NOT EXISTS `fotos_salao` (
+  `id_foto` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador único da foto do salão.',
+  `titulo` VARCHAR(120) NULL COMMENT 'Título opcional da foto.',
+  `descricao` TEXT NULL COMMENT 'Descrição opcional da foto.',
+  `caminho_arquivo` VARCHAR(500) NOT NULL COMMENT 'Caminho relativo do arquivo salvo no servidor.',
+  `nome_original` VARCHAR(255) NULL COMMENT 'Nome original do arquivo enviado.',
+  `tipo_mime` VARCHAR(100) NULL COMMENT 'Tipo MIME da imagem.',
+  `tamanho_bytes` BIGINT NULL COMMENT 'Tamanho do arquivo em bytes.',
+  `foto_principal` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Indica se a foto é a principal.',
+  `ordem_exibicao` INT NOT NULL DEFAULT 0 COMMENT 'Ordem de exibição na página pública.',
+  `ativo` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Indica se a foto aparece na página pública.',
+  `data_upload` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Data de upload da foto.',
+  `data_atualizacao` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Data de atualização do registro.',
+  PRIMARY KEY (`id_foto`),
+  INDEX `idx_fotos_salao_ativo` (`ativo`),
+  INDEX `idx_fotos_salao_ordem` (`ordem_exibicao`),
+  INDEX `idx_fotos_salao_principal` (`foto_principal`)
+) ENGINE=InnoDB COMMENT='Fotos do salão de eventos da ASSANDEF.';
+
+-- =================================================================
+-- 21. SOLICITAÇÕES DE ALUGUEL DO SALÃO
 -- Armazena as solicitações enviadas pelo formulário público de aluguel do salão.
 -- Novo fluxo: o usuário informa a data e o horário desejados, sem depender
 -- de cadastro prévio de disponibilidades pela secretaria.
@@ -414,6 +458,8 @@ CREATE TABLE IF NOT EXISTS `solicitacoes_aluguel_salao` (
   `documento` VARCHAR(18) NOT NULL COMMENT 'CPF ou CNPJ informado pelo solicitante.',
   `celular` VARCHAR(20) NOT NULL COMMENT 'Celular para contato com o solicitante.',
   `email` VARCHAR(255) NOT NULL COMMENT 'E-mail para contato com o solicitante.',
+  `id_plano_aluguel` INT NULL COMMENT 'Plano de aluguel selecionado pelo solicitante.',
+  `nome_plano_apresentado` VARCHAR(120) NULL COMMENT 'Nome do plano apresentado no momento da solicitação.',
   `data_desejada` DATE NOT NULL COMMENT 'Data desejada pelo usuário para aluguel do salão.',
   `hora_inicio_desejada` TIME NOT NULL COMMENT 'Horário inicial desejado para a locação.',
   `hora_fim_desejada` TIME NOT NULL COMMENT 'Horário final desejado para a locação.',
@@ -427,11 +473,16 @@ CREATE TABLE IF NOT EXISTS `solicitacoes_aluguel_salao` (
   `data_atualizacao` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Data e hora da última atualização.',
   PRIMARY KEY (`id_solicitacao`),
   INDEX `fk_solicitacoes_aluguel_funcionarios_idx` (`id_funcionario_responsavel`),
+  INDEX `fk_solicitacoes_aluguel_planos_idx` (`id_plano_aluguel`),
   INDEX `idx_solicitacoes_aluguel_status` (`status`),
   INDEX `idx_solicitacoes_aluguel_documento` (`documento`),
   INDEX `idx_solicitacoes_aluguel_email` (`email`),
   INDEX `idx_solicitacoes_aluguel_data` (`data_desejada`),
   INDEX `idx_solicitacoes_aluguel_data_horario` (`data_desejada`, `hora_inicio_desejada`, `hora_fim_desejada`),
+  CONSTRAINT `fk_solicitacoes_aluguel_planos`
+    FOREIGN KEY (`id_plano_aluguel`)
+    REFERENCES `planos_aluguel_salao` (`id_plano`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_solicitacoes_aluguel_funcionarios`
     FOREIGN KEY (`id_funcionario_responsavel`)
     REFERENCES `funcionarios` (`id_funcionario`)

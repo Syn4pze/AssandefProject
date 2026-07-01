@@ -1,6 +1,7 @@
 package br.org.assandef.assandefsystem.service;
 
 import br.org.assandef.assandefsystem.model.Funcionario;
+import br.org.assandef.assandefsystem.model.PlanoAluguelSalao;
 import br.org.assandef.assandefsystem.model.SolicitacaoAluguelSalao;
 import br.org.assandef.assandefsystem.model.SolicitacaoAluguelSalao.StatusSolicitacaoAluguelSalao;
 import br.org.assandef.assandefsystem.repository.SolicitacaoAluguelSalaoRepository;
@@ -17,6 +18,7 @@ import java.util.List;
 public class SolicitacaoAluguelSalaoService {
 
     private final SolicitacaoAluguelSalaoRepository solicitacaoAluguelSalaoRepository;
+    private final PlanoAluguelSalaoService planoAluguelSalaoService;
 
     public List<SolicitacaoAluguelSalao> findAll() {
         return solicitacaoAluguelSalaoRepository.findAllByOrderByDataSolicitacaoDesc();
@@ -28,17 +30,41 @@ public class SolicitacaoAluguelSalaoService {
         );
     }
 
+    public List<SolicitacaoAluguelSalao> findAlugadas() {
+        return solicitacaoAluguelSalaoRepository.findByStatusOrderByDataDesejadaAscHoraInicioDesejadaAsc(
+                StatusSolicitacaoAluguelSalao.ALUGADO
+        );
+    }
+
+    public List<String> findDatasOcupadasIso() {
+        return solicitacaoAluguelSalaoRepository.findDatasByStatus(StatusSolicitacaoAluguelSalao.ALUGADO)
+                .stream()
+                .map(LocalDate::toString)
+                .toList();
+    }
+
     public SolicitacaoAluguelSalao findById(Integer id) {
         return solicitacaoAluguelSalaoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitação de aluguel não encontrada com ID: " + id));
     }
 
     @Transactional
-    public SolicitacaoAluguelSalao criarSolicitacaoPublica(SolicitacaoAluguelSalao solicitacao) {
+    public SolicitacaoAluguelSalao criarSolicitacaoPublica(SolicitacaoAluguelSalao solicitacao, Integer idPlanoAluguel) {
         validarSolicitacaoPublica(solicitacao);
 
+        if (idPlanoAluguel == null) {
+            throw new RuntimeException("Selecione um plano de aluguel.");
+        }
+
+        PlanoAluguelSalao plano = planoAluguelSalaoService.findById(idPlanoAluguel);
+        if (!Boolean.TRUE.equals(plano.getAtivo())) {
+            throw new RuntimeException("O plano selecionado não está disponível para novas solicitações.");
+        }
+
         solicitacao.setIdSolicitacao(null);
-        solicitacao.setValorApresentado(null);
+        solicitacao.setPlanoAluguel(plano);
+        solicitacao.setNomePlanoApresentado(plano.getNomePlano());
+        solicitacao.setValorApresentado(plano.getValor());
         solicitacao.setStatus(StatusSolicitacaoAluguelSalao.PENDENTE);
         solicitacao.setDataAnalise(null);
         solicitacao.setFuncionarioResponsavel(null);
